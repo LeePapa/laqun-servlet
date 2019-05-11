@@ -36,8 +36,10 @@ public class getLaQun extends HttpServlet {
         try {
             String customer = request.getParameter("customer");
             conn = utils.getConnection();
-            stmt = conn.prepareStatement("select * from addQun where qunQr like ?");
+            stmt = conn.prepareStatement("select * from addQun where qunQr like ? limit ?, ?");
             stmt.setString(1, "%" + request.getParameter("searchPhone") + "%");
+            stmt.setInt(2, (Integer.valueOf(request.getParameter("page"))-1)*10);
+            stmt.setInt(3, Integer.valueOf(request.getParameter("pageSize")));
             ResultSet res = stmt.executeQuery();
             JSONArray ja = new JSONArray();
             while (res.next()) {
@@ -57,6 +59,16 @@ public class getLaQun extends HttpServlet {
             }
             resJo.put("res", "success");
             resJo.put("data", ja);
+
+            //查询总数
+            stmt = conn.prepareStatement("select count(*) as total from addQun where qunQr like ?");
+            stmt.setString(1, "%" + request.getParameter("searchPhone") + "%");
+            res = stmt.executeQuery();
+            if(res.next()) {
+                resJo.put("total", res.getInt("total"));
+            }else{
+                resJo.put("total", 0);
+            }
             res.close();
             if (conn != null) {
                 try {

@@ -35,7 +35,7 @@ public class delLaQun extends HttpServlet {
             String customer = request.getParameter("customer");
             conn = utils.getConnection();
             stmt = conn.prepareStatement("delete from addQun where qunQr = ?");
-            stmt.setString(1, request.getParameter("phone"));
+            stmt.setString(1, request.getParameter("qunQr"));
             stmt.execute();
             resJo.put("res", "success");
             if (conn != null) {

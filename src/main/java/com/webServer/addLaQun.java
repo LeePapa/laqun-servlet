@@ -25,7 +25,7 @@ public class addLaQun extends HttpServlet {
         response.setContentType("application/json;charset=utf-8");
         PrintWriter pw = response.getWriter();
         JSONObject resJo = new JSONObject();
-        resJo.put("saveQunidCount", 0);
+        resJo.put("saveCount", 0);
         String customer = null;
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -63,12 +63,13 @@ public class addLaQun extends HttpServlet {
                         stmt.execute();
                     }
                 } catch (Exception e) {
+                    e.printStackTrace();
                     getServletContext().log("add laQun err: " + e.getMessage());
                 }
             }
             res = stmt.executeQuery("select * from addQun");
             res.last();
-            resJo.put("addCount", res.getRow() - saveQunidCount);
+            resJo.put("saveCount", res.getRow() - saveQunidCount);
             resJo.put("res", "success");
             res.close();
             if (conn != null) {
