@@ -1,5 +1,6 @@
 package com.phoneServer;
 
+import com.common.InOutLog;
 import com.common.utils;
 import java.io.File;
 import java.io.IOException;
@@ -35,6 +36,7 @@ public class uploadFile extends HttpServlet {
         }
         pw.println(resJo);
         pw.close();
+        InOutLog.logInOut(request, resJo);
     }
 
     /* Access modifiers changed, original: protected */

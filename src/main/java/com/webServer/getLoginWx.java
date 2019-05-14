@@ -80,10 +80,13 @@ public class getLoginWx extends HttpServlet {
             wwb.close();
             resJo.put("res", "success");
             resJo.put("data", ja);
-            stmt = conn.prepareStatement("select count(*) as total from loginWx");
+            stmt = conn.prepareStatement("select count(*) as total from loginWx where wxName like ?");
+            stmt.setString(1, "%" + request.getParameter("wxName") + "%");
             res = stmt.executeQuery();
             if(res.next()) {
                 resJo.put("total", res.getInt("total"));
+            }else{
+                resJo.put("total", 0);
             }
             res.close();
             if (conn != null) {

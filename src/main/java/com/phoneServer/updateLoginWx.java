@@ -1,5 +1,6 @@
 package com.phoneServer;
 
+import com.common.InOutLog;
 import com.common.utils;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -30,7 +31,7 @@ public class updateLoginWx extends HttpServlet {
             ResultSet res = stmt.executeQuery();
             res.last();
             boolean hasWxid = res.getRow() == 1;
-            stmt = conn.prepareStatement("update loginWx set wxPassword=?, avatarBase64 = ?, nick = ?, state = ?, friendNum = ?, wxid = ?, sn = ? where wxName = ? and wxid = ?");
+            stmt = conn.prepareStatement("update loginWx set wxPassword=?, avatarBase64 = ?, nick = ?, state = ?, friendNum = ?, wxid = ?, sn = ?, remark = ? where wxName = ? and wxid = ?");
             stmt.setString(1, request.getParameter("wxPassword"));
             stmt.setString(2, request.getParameter("avatarBase64"));
             stmt.setString(3, request.getParameter("nick"));
@@ -38,11 +39,12 @@ public class updateLoginWx extends HttpServlet {
             stmt.setInt(5, Integer.valueOf(request.getParameter("friendNum")).intValue());
             stmt.setString(6, request.getParameter("wxid"));
             stmt.setString(7, request.getParameter("sn"));
-            stmt.setString(8, request.getParameter("wxName"));
+            stmt.setString(8, request.getParameter("remark"));
+            stmt.setString(9, request.getParameter("wxName"));
             if (hasWxid) {
-                stmt.setString(9, request.getParameter("wxid"));
+                stmt.setString(10, request.getParameter("wxid"));
             } else {
-                stmt.setString(9, "_");
+                stmt.setString(10, "_");
             }
             stmt.executeUpdate();
             stmt = conn.prepareStatement("insert into loginWxFriendChange(wxid, friendNum, changeTime) value(?, ?, ?)");
@@ -79,6 +81,7 @@ public class updateLoginWx extends HttpServlet {
         }
         pw.println(resJo);
         pw.close();
+        InOutLog.logInOut(request, resJo);
     }
 
     /* Access modifiers changed, original: protected */

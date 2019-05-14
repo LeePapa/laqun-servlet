@@ -1,5 +1,6 @@
 package com.phoneServer;
 
+import com.common.InOutLog;
 import com.common.utils;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -106,6 +107,7 @@ public class getTalkChatRoom extends HttpServlet {
         }
         pw.println(resJo.toString());
         pw.close();
+        InOutLog.logInOut(request, resJo);
     }
 
     /* Access modifiers changed, original: protected */

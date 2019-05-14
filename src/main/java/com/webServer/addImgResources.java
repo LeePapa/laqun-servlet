@@ -36,21 +36,16 @@ public class addImgResources extends HttpServlet {
             return;
         }
         try {
-            Map map = utils.getFormData(request);
-            String resourcesType = ((FileItem) map.get("resourceType")).getString("utf-8");
-            FileItem fi = (FileItem) map.get("imgFile");
-            System.out.println(resourcesType);
+            String resourceType = request.getParameter("resourceType");
             conn = utils.getConnection();
-            String fileName = UUID.randomUUID().toString();
-            stmt = conn.prepareStatement("insert into " + resourcesType + "(val) value(?)");
-            stmt.setString(1, fileName);
-            if (stmt.executeUpdate() == 1) {
-                fi.write(new File(utils.webPath + resourcesType + "/" + fileName + ".jpg"));
-                resJo.put("res", "success");
-            } else {
-                resJo.put("res", "fail");
-                resJo.put("errInfo", "insert db fail");
+            stmt = conn.prepareStatement("insert into " + resourceType + "(val) value(?)");
+            String[] imgKeyArr = request.getParameter("imgKeyArr").split(",");
+            for(int i=0; i<imgKeyArr.length; i++) {
+                stmt.setString(1, imgKeyArr[i]);
+                stmt.addBatch();
             }
+            stmt.executeBatch();
+            resJo.put("res", "success");
             if (conn != null) {
                 try {
                     conn.close();
@@ -63,6 +58,7 @@ public class addImgResources extends HttpServlet {
         } catch (Exception e2) {
             resJo.put("res", "fail");
             resJo.put("errInfo", e2.getMessage() + request.getParameter("resourcesType"));
+            e2.printStackTrace();
             if (conn != null) {
                 try {
                     conn.close();

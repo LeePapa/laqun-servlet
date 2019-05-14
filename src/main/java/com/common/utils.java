@@ -1,12 +1,6 @@
 package com.common;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,6 +15,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 public class utils {
     public static String webPath = "";
+    public static String tpUriPre = "-1258004048.cos.ap-guangzhou.myqcloud.com/";
 
     public static void wlToF(String fp, String s) {
         try {
@@ -148,6 +143,32 @@ public class utils {
             fos.close();
         }catch (Exception e) {
 
+        }
+    }
+
+    public static String getExceptionMsg(Exception e){
+        StringWriter sw = null;
+        PrintWriter pw = null;
+        try {
+            sw = new StringWriter();
+            pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            pw.flush();
+            sw.flush();
+            return sw.toString();
+        }catch (Exception e1){
+            return "获取exception详细信息发生错误： " + e.getMessage();
+        }finally {
+            if (sw!=null){
+                try {
+                    sw.close();
+                }catch (Exception e2){
+                    e2.printStackTrace();
+                }
+            }
+            if (pw != null){
+                pw.close();
+            }
         }
     }
 

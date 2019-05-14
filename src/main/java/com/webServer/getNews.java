@@ -50,10 +50,13 @@ public class getNews extends HttpServlet {
             }
             resJo.put("res", "success");
             resJo.put("data", ja);
-            stmt = conn.prepareStatement("select count(*) as total from news");
+            stmt = conn.prepareStatement("select count(*) as total from news where newsName like ?");
+            stmt.setString(1, "%" + request.getParameter("newsName") + "%");
             res = stmt.executeQuery();
             if(res.next()) {
                 resJo.put("total", res.getInt("total"));
+            }else{
+                resJo.put("total", 0);
             }
             res.close();
             if (conn != null) {

@@ -50,10 +50,13 @@ public class getSnGroup extends HttpServlet {
             }
             resJo.put("res", "success");
             resJo.put("data", ja);
-            stmt = conn.prepareStatement("select count(*) as total from snGroup");
+            stmt = conn.prepareStatement("select count(*) as total from snGroup where groupName like ?");
+            stmt.setString(1, "%" + request.getParameter("groupName") + "%");
             res = stmt.executeQuery();
             if(res.next()) {
                 resJo.put("total", res.getInt("total"));
+            }else{
+                resJo.put("total", 0);
             }
             res.close();
             if (conn != null) {

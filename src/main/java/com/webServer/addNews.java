@@ -1,5 +1,6 @@
 package com.webServer;
 
+import com.common.InOutLog;
 import com.common.config;
 import com.common.utils;
 import java.io.IOException;
@@ -88,6 +89,7 @@ public class addNews extends HttpServlet {
         }
         pw.println(resJo);
         pw.close();
+        InOutLog.logInOut(request, resJo);
     }
 
     /* Access modifiers changed, original: protected */

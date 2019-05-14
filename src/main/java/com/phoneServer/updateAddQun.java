@@ -1,5 +1,6 @@
 package com.phoneServer;
 
+import com.common.InOutLog;
 import com.common.utils;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -72,6 +73,7 @@ public class updateAddQun extends HttpServlet {
         }
         pw.println(resJo);
         pw.close();
+        InOutLog.logInOut(request, resJo);
     }
 
     /* Access modifiers changed, original: protected */

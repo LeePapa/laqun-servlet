@@ -8,12 +8,15 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import static com.common.utils.webPath;
@@ -38,14 +41,21 @@ public class clearImg extends HttpServlet {
         try {
             String resourceType = request.getParameter("resourceType");
             conn = utils.getConnection();
+            //先取出全部图片key，用于删除对象存储里面的
+            stmt = conn.prepareStatement("select * from " + resourceType);
+            ResultSet res = stmt.executeQuery();
+            JSONArray ja = new JSONArray();
+            while (res.next()) {
+                JSONObject jo = new JSONObject();
+                jo.put("Key", res.getString("val"));
+                ja.put(jo);
+            }
+            JSONObject jo = new JSONObject();
+            jo.put("Key", "a.jpg");
+            ja.put(jo);
+            resJo.put("data", ja);
             stmt = conn.prepareStatement("truncate " + resourceType);
             stmt.execute();
-            File[] fArr = new File(webPath +  resourceType).listFiles();
-            if(fArr != null) {
-                for(File f: fArr) {
-                    f.deleteOnExit();
-                }
-            }
 
             resJo.put("res", "success");
             if (conn != null) {

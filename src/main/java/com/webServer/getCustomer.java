@@ -54,10 +54,13 @@ public class getCustomer extends HttpServlet {
             }
             resJo.put("res", "success");
             resJo.put("data", ja);
-            stmt = conn.prepareStatement("select count(*) as total from customer");
+            stmt = conn.prepareStatement("select count(*) as total from customer where name like ?");
+            stmt.setString(1, "%" + request.getParameter("customerName") + "%");
             res = stmt.executeQuery();
             if (res.next()) {
                 resJo.put("total", res.getInt("total"));
+            }else{
+                resJo.put("total", 0);
             }
             res.close();
             if (conn != null) {

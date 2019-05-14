@@ -1,5 +1,6 @@
 package com.phoneServer;
 
+import com.common.InOutLog;
 import com.common.utils;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -71,6 +72,7 @@ public class getJob extends HttpServlet {
                 }
             }
         }
+        InOutLog.logInOut(request, resJo);
         pw.println(resJo.toString());
         pw.close();
     }

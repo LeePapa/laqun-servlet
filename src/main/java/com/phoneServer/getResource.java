@@ -1,11 +1,14 @@
 package com.phoneServer;
 
+import com.common.InOutLog;
 import com.common.utils;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -18,6 +21,7 @@ import org.json.JSONObject;
 public class getResource extends HttpServlet {
     /* Access modifiers changed, original: protected */
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        getServletContext().log("start put info");
         request.setCharacterEncoding("utf-8");
         response.setContentType("application/json;charset=utf-8");
         PrintWriter pw = response.getWriter();
@@ -25,6 +29,9 @@ public class getResource extends HttpServlet {
         Connection conn = null;
         PreparedStatement stmt = null;
         int resourcesNum = Integer.valueOf(request.getParameter("resourcesNum")).intValue();
+        String resourceType = request.getParameter("resourcesType");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        getServletContext().log("start put info");
         try {
             conn = utils.getConnection();
             stmt = conn.prepareStatement("select * from sn where sn = ? limit 1");
@@ -32,15 +39,26 @@ public class getResource extends HttpServlet {
             ResultSet res = stmt.executeQuery();
             res.last();
             if (res.getRow() > 0) {
-                stmt = conn.prepareStatement("select * from " + request.getParameter("resourcesType") + " order by rand() limit ?");
+                stmt = conn.prepareStatement("select * from " + resourceType + " order by rand() limit ?");
                 stmt.setInt(1, resourcesNum);
                 res = stmt.executeQuery();
                 JSONArray resJa = new JSONArray();
+                getServletContext().log("start put info");
                 while (res.next()) {
-                    resJa.put(res.getString("val"));
+                    if (resourceType.equals("avatar") || resourceType.equals("backImg") || resourceType.equals("momentsImg")){
+                        resJa.put("http://" + resourceType.toLowerCase() + utils.tpUriPre +  res.getString("val"));
+                    }else{
+                        resJa.put(res.getString("val"));
+                    }
+
                 }
                 resJo.put("res", "success");
                 resJo.put("data", resJa);
+                //更新手机的最后连接时间
+                stmt = conn.prepareStatement("update sn set lastHttpTime = ? where sn = ?");
+                stmt.setString(1, sdf.format(new Date()));
+                stmt.setString(2, request.getParameter("sn"));
+                stmt.executeUpdate();
             } else {
                 resJo.put("res", "fail");
                 resJo.put("errInfo", "noSn" + request.getParameter("sn"));
@@ -55,8 +73,9 @@ public class getResource extends HttpServlet {
                 stmt.close();
             }
         } catch (Exception e2) {
+            e2.printStackTrace();
             resJo.put("res", "fail");
-            resJo.put("errInfo", e2.getMessage());
+            resJo.put("errInfo", utils.getExceptionMsg(e2));
             if (conn != null) {
                 try {
                     conn.close();
@@ -73,9 +92,11 @@ public class getResource extends HttpServlet {
         }
         pw.println(resJo.toString());
         pw.close();
+        InOutLog.logInOut(request, resJo);
     }
 
     /* Access modifiers changed, original: protected */
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        doPost(request, response);
     }
 }

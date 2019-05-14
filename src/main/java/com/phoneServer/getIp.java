@@ -1,5 +1,6 @@
 package com.phoneServer;
 
+import com.common.InOutLog;
 import com.common.config;
 import com.common.utils;
 import java.io.IOException;
@@ -80,5 +81,6 @@ public class getIp extends HttpServlet {
         }
         pw.println(resJo.toString());
         pw.close();
+        InOutLog.logInOut(request, resJo);
     }
 }
