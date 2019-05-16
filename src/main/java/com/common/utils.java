@@ -2,11 +2,8 @@ package com.common;
 
 import java.io.*;
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.fileupload.FileItem;
@@ -16,6 +13,11 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 public class utils {
     public static String webPath = "";
     public static String tpUriPre = "-1258004048.cos.ap-guangzhou.myqcloud.com/";
+    public static SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    public static String getCurrentTimeStr() {
+        return sdf.format(new Date());
+    }
 
     public static void wlToF(String fp, String s) {
         try {

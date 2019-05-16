@@ -12,10 +12,13 @@ public class DbUtils {
 
     public static void initDataSource() {
         p = new PoolProperties();
-        p.setUrl("jdbc:mysql://localhost:3306/laqun?serverTimezone=GMT");
+//        p.setUrl("jdbc:mysql://10.66.237.140:3306/laqun?serverTimezone=GMT");
+        p.setUrl("jdbc:mysql://tdsql-k3gjdmst.sql.tencentcdb.com:21/laqun?serverTimezone=GMT&characterEncoding=utf-8&useUnicode=true&useSSL=false");
+        p.setInitSQL("set names utf8mb4");
+        p.setUrl("jdbc:mysql://localhost:3306/laqun?serverTimezone=GMT&characterEncoding=utf-8&useUnicode=true");
         p.setDriverClassName("com.mysql.cj.jdbc.Driver");
         p.setUsername("laqun");
-        p.setPassword("laqunQun");
+        p.setPassword("laqunQun1");
         p.setJmxEnabled(true);
         p.setTestWhileIdle(false);
         p.setTestOnBorrow(true);

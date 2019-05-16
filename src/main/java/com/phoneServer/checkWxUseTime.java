@@ -8,6 +8,7 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Date;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -27,18 +28,17 @@ public class checkWxUseTime extends HttpServlet {
         PreparedStatement stmt = null;
         try {
             conn = utils.getConnection();
-            stmt = conn.prepareStatement("select * from sn where sn = ? limit 1");
-            stmt.setString(1, request.getParameter("sn"));
-            ResultSet res = stmt.executeQuery();
-            res.last();
-            if (res.getRow() > 0) {
+            stmt = conn.prepareStatement("update sn set lastHttpTime = ? where sn = ?");
+            stmt.setString(1, utils.getCurrentTimeStr());
+            stmt.setString(2, request.getParameter("sn"));
+            if (stmt.executeUpdate() == 1) {
                 stmt = conn.prepareStatement("select sn from loginWx where wxid = ? and sn = ? limit 1");
                 stmt.setString(1, request.getParameter("wxid"));
                 stmt.setString(2, request.getParameter("sn"));
                 if (stmt.executeQuery().next()) {
                     stmt = conn.prepareStatement("select lastGetTime from loginWx where wxid = ? limit 1");
                     stmt.setString(1, request.getParameter("wxid"));
-                    res = stmt.executeQuery();
+                    ResultSet res = stmt.executeQuery();
                     if (res.next()) {
                         JSONObject wxJo = new JSONObject();
                         if ((System.currentTimeMillis() / 1000) - ((long) (Integer.valueOf(config.get("loginWxUseTime")).intValue() * 60)) > ((long) res.getInt("lastGetTime"))) {

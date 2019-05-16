@@ -27,6 +27,7 @@ public class InOutLog {
             stmt.setString(4, resJo.toString());
             stmt.setString(5, url);
             System.out.println(stmt.executeUpdate());
+            if (conn != null) conn.close();
         }catch (Exception e) {
             e.printStackTrace();
         }

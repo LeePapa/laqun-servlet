@@ -35,9 +35,11 @@ public class getImgList extends HttpServlet {
         PreparedStatement stmt = null;
         try {
             conn = utils.getConnection();
-            stmt = conn.prepareStatement("select * from " + request.getParameter("resourcesType") + " order by id, val limit ?, ?");
-            stmt.setInt(1, (Integer.valueOf(request.getParameter("page"))-1)*10);
-            stmt.setInt(2, Integer.valueOf(request.getParameter("pageSize")));
+            String resourceType = request.getParameter("resourceType");
+            stmt = conn.prepareStatement("select * from resource where type = ? order by id, val limit ?, ?");
+            stmt.setString(1, resourceType);
+            stmt.setInt(2, (Integer.valueOf(request.getParameter("page"))-1)*10);
+            stmt.setInt(3, Integer.valueOf(request.getParameter("pageSize")));
             ResultSet res = stmt.executeQuery();
             JSONArray ja = new JSONArray();
             while (res.next()) {
@@ -50,7 +52,8 @@ public class getImgList extends HttpServlet {
             resJo.put("data", ja);
 
             //查询总数
-            stmt = conn.prepareStatement("select count(*) as total from " + request.getParameter("resourcesType"));
+            stmt = conn.prepareStatement("select count(*) as total from resource where type = ?");
+            stmt.setString(1, resourceType);
             res = stmt.executeQuery();
             if(res.next()) {
                 resJo.put("total", res.getInt("total"));

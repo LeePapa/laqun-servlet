@@ -8,7 +8,7 @@
             maxIdle="30"
             maxWaitMillis="10000"
             username="laqun"
-            password="laqunQun"
+            password="laqunQun1"
             driverClassName="com.mysql.cj.jdbc.Driver"
-            url="jdbc:mysql://localhost:3306/laqun" />
+            url="jdbc:mysql://tdsql-k3gjdmst.sql.tencentcdb.com/laqun" />
 </Context>

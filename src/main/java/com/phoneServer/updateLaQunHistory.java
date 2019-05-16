@@ -1,21 +1,24 @@
 package com.phoneServer;
 
-import com.common.InOutLog;
+import com.common.config;
 import com.common.utils;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.json.JSONObject;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
-@WebServlet({"/api/phoneServer/releaseAddWx"})
-public class releaseAddWx extends HttpServlet {
+@WebServlet({"/api/phoneServer/updateLaQunHistory"})
+public class updateLaQunHistory extends HttpServlet {
     /* Access modifiers changed, original: protected */
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("utf-8");
@@ -24,60 +27,66 @@ public class releaseAddWx extends HttpServlet {
         JSONObject resJo = new JSONObject();
         Connection conn = null;
         PreparedStatement stmt = null;
+        ResultSet res = null;
         try {
+            String[] wxidArr= request.getParameter("wxidlist").split(",");
             conn = utils.getConnection();
             stmt = conn.prepareStatement("update sn set lastHttpTime = ? where sn = ?");
             stmt.setString(1, utils.getCurrentTimeStr());
             stmt.setString(2, request.getParameter("sn"));
             if (stmt.executeUpdate() == 1) {
-//                stmt = conn.prepareStatement("select customer from addWx where phone = ?");
-//                stmt.setString(1, request.getParameter("addWx"));
-//                ResultSet res = stmt.executeQuery();
-//                res.next();
-//                String customer = res.getString("customer");
-                stmt = conn.prepareStatement("update addWx set isUse = 0, loginWx = '' where phone = ?");
-                stmt.setString(1, request.getParameter("addWx"));
-                stmt.executeUpdate();
-//                stmt.execute("update customer set addNum = addNum - 1 where name = '" + customer + "'");
-                stmt.execute("update loginWx set addNum = addNum - 1 where wxid = '" + request.getParameter("loginWx") + "'");
+                for (int i=0; i<wxidArr.length; i++) {
+                    stmt = conn.prepareStatement("select * from laQunHistory where wxid = ? limit 1");
+                    stmt.setString(1, wxidArr[i]);
+                    res = stmt.executeQuery();
+                    if(res.next()) {
+                        stmt = conn.prepareStatement("update laQunHistory set laNum = laNum + 1, laTime = ?  where wxid = ?");
+                        stmt.setString(1, utils.getCurrentTimeStr());
+                        stmt.setString(2, wxidArr[i]);
+                    }else{
+                        stmt = conn.prepareStatement("insert into laQunHistory(wxid, laNum, addTime, laTime) values(?, 1, ?, ?)");
+                        stmt.setString(1, wxidArr[i]);
+                        stmt.setString(2, utils.getCurrentTimeStr());
+                        stmt.setString(3, utils.getCurrentTimeStr());
+                    }
+                    stmt.executeUpdate();
+                }
                 resJo.put("res", "success");
-            } else {
+            }else{
                 resJo.put("res", "fail");
                 resJo.put("errInfo", "noSn" + request.getParameter("sn"));
             }
-            if (stmt != null) {
+
+            res.close();
+            if (conn != null) {
                 try {
-                    stmt.execute("unlock tables");
-                    stmt.close();
+                    conn.close();
                 } catch (Exception e) {
                 }
             }
-            if (conn != null) {
-                conn.close();
+            if (stmt != null) {
+                stmt.close();
             }
         } catch (Exception e2) {
             e2.printStackTrace();
             resJo.put("res", "fail");
-            resJo.put("errInfo", e2.getMessage());
-            if (stmt != null) {
+            resJo.put("errInfo", utils.getExceptionMsg(e2));
+            if (conn != null) {
                 try {
-                    stmt.execute("unlock tables");
-                    stmt.close();
+                    conn.close();
                 } catch (Exception e3) {
                 }
             }
         } catch (Throwable th) {
-            if (stmt != null) {
+            if (conn != null) {
                 try {
-                    stmt.execute("unlock tables");
-                    stmt.close();
+                    conn.close();
                 } catch (Exception e4) {
                 }
             }
         }
-        pw.println(resJo.toString());
+        pw.println(resJo);
         pw.close();
-        InOutLog.logInOut(request, resJo);
     }
 
     /* Access modifiers changed, original: protected */

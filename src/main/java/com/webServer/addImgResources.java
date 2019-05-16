@@ -38,10 +38,12 @@ public class addImgResources extends HttpServlet {
         try {
             String resourceType = request.getParameter("resourceType");
             conn = utils.getConnection();
-            stmt = conn.prepareStatement("insert into " + resourceType + "(val) value(?)");
+            stmt = conn.prepareStatement("insert into resource(type, val, addTime) value(?, ?, ?)");
             String[] imgKeyArr = request.getParameter("imgKeyArr").split(",");
             for(int i=0; i<imgKeyArr.length; i++) {
-                stmt.setString(1, imgKeyArr[i]);
+                stmt.setString(1, resourceType);
+                stmt.setString(2, imgKeyArr[i]);
+                stmt.setString(3, utils.getCurrentTimeStr());
                 stmt.addBatch();
             }
             stmt.executeBatch();
@@ -57,7 +59,7 @@ public class addImgResources extends HttpServlet {
             }
         } catch (Exception e2) {
             resJo.put("res", "fail");
-            resJo.put("errInfo", e2.getMessage() + request.getParameter("resourcesType"));
+            resJo.put("errInfo", utils.getExceptionMsg(e2));
             e2.printStackTrace();
             if (conn != null) {
                 try {

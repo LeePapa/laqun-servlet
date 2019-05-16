@@ -31,14 +31,13 @@ public class getLoginWx extends HttpServlet {
         try {
             conn = utils.getConnection();
             getServletContext().log("is auto commit: " + conn.getAutoCommit());
-            stmt = conn.prepareStatement("select * from sn where sn = ? limit 1");
-            stmt.setString(1, sn);
-            ResultSet res = stmt.executeQuery();
-            res.last();
-            if (res.getRow() > 0) {
+            stmt = conn.prepareStatement("update sn set lastHttpTime = ? where sn = ?");
+            stmt.setString(1, utils.getCurrentTimeStr());
+            stmt.setString(2, request.getParameter("sn"));
+            if (stmt.executeUpdate() == 1) {
                 stmt = conn.prepareStatement("select count(*) as loginWxNum from loginWx where sn = ?");
                 stmt.setString(1, sn);
-                res = stmt.executeQuery();
+                ResultSet res = stmt.executeQuery();
                 res.next();
                 if (res.getInt("loginWxNum") == Integer.valueOf(config.get("loginWxNum")).intValue()) {
                     resJo.put("res", "fail");

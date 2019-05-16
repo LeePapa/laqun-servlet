@@ -30,21 +30,30 @@ public class updateAddQun extends HttpServlet {
         String inParamStr = "'" + StringUtils.join(request.getParameter("laWxidArr").split(","), "','") + "'";
         try {
             conn = utils.getConnection();
-            stmt = conn.prepareStatement("update addQun set nick = ?, laedNum = laedNum + ?, qunid = ?, isUse = ?, friendNum = ?, isBad = ? where qunQr = ?");
-            stmt.setString(1, nick);
-            stmt.setInt(2, laedNum);
-            stmt.setString(3, qunid);
-            stmt.setInt(4, Integer.valueOf(request.getParameter("isUse")).intValue());
-            stmt.setInt(5, Integer.valueOf(request.getParameter("friendNum")).intValue());
-            stmt.setInt(6, Integer.valueOf(request.getParameter("isBad")).intValue());
-            stmt.setString(7, request.getParameter("qunQr"));
-            resJo.put("updateQunNum", stmt.executeUpdate());
-            stmt = conn.prepareStatement("update addWx set isLa = 1, laTime = ?, laQunId = ? where wxid in (" + inParamStr + ")");
-            stmt.setInt(1, (int) (System.currentTimeMillis() / 1000));
-            stmt.setString(2, request.getParameter("qunid"));
-            resJo.put("inParamStr", inParamStr);
-            resJo.put("updateWxNum", stmt.executeUpdate());
-            resJo.put("res", "success");
+            stmt = conn.prepareStatement("update sn set lastHttpTime = ? where sn = ?");
+            stmt.setString(1, utils.getCurrentTimeStr());
+            stmt.setString(2, request.getParameter("sn"));
+            if (stmt.executeUpdate() == 1) {
+                stmt = conn.prepareStatement("update addQun set nick = ?, laedNum = laedNum + ?, qunid = ?, isUse = ?, friendNum = ?, isBad = ? where qunQr = ?");
+                stmt.setString(1, nick);
+                stmt.setInt(2, laedNum);
+                stmt.setString(3, qunid);
+                stmt.setInt(4, Integer.valueOf(request.getParameter("isUse")).intValue());
+                stmt.setInt(5, Integer.valueOf(request.getParameter("friendNum")).intValue());
+                stmt.setInt(6, Integer.valueOf(request.getParameter("isBad")).intValue());
+                stmt.setString(7, request.getParameter("qunQr"));
+                resJo.put("updateQunNum", stmt.executeUpdate());
+                stmt = conn.prepareStatement("update addWx set isLa = 1, laTime = ?, laQunId = ? where wxid in (" + inParamStr + ")");
+                stmt.setInt(1, (int) (System.currentTimeMillis() / 1000));
+                stmt.setString(2, request.getParameter("qunid"));
+                resJo.put("inParamStr", inParamStr);
+                resJo.put("updateWxNum", stmt.executeUpdate());
+                resJo.put("res", "success");
+            } else {
+                resJo.put("res", "fail");
+                resJo.put("errInfo", "noSn" + request.getParameter("sn"));
+            }
+
             if (conn != null) {
                 try {
                     conn.close();

@@ -32,14 +32,19 @@ public class delImg extends HttpServlet {
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
-            String resourceType = request.getParameter("resourcesType");
+            String resourceType = request.getParameter("resourceType");
             String fileName = request.getParameter("fileName");
             conn = utils.getConnection();
-            stmt = conn.prepareStatement("delete from " + resourceType + " where val = ?");
-            stmt.setString(1, fileName);
-            stmt.execute();
-            utils.rmFile(utils.webPath + resourceType + "/" + fileName + ".jpg");
-            resJo.put("res", "success");
+            stmt = conn.prepareStatement("delete from resource where type = ? and val = ?");
+            stmt.setString(1, resourceType);
+            stmt.setString(2, fileName);
+            if(stmt.executeUpdate() == 1) {
+                resJo.put("res", "success");
+            }else {
+                resJo.put("res", "fail");
+                resJo.put("errInfo", "数据库删除失败");
+            }
+
             if (conn != null) {
                 try {
                     conn.close();
@@ -51,7 +56,7 @@ public class delImg extends HttpServlet {
             }
         } catch (Exception e2) {
             resJo.put("res", "fail");
-            resJo.put("errInfo", e2.getMessage());
+            resJo.put("errInfo", utils.getExceptionMsg(e2));
             if (conn != null) {
                 try {
                     conn.close();

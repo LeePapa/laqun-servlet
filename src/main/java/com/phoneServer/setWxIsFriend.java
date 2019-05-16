@@ -30,11 +30,10 @@ public class setWxIsFriend extends HttpServlet {
         String wxidS = StringUtils.join(wxidArr, "','");
         try {
             conn = utils.getConnection();
-            stmt = conn.prepareStatement("select * from sn where sn = ? limit 1");
-            stmt.setString(1, request.getParameter("sn"));
-            ResultSet res = stmt.executeQuery();
-            res.last();
-            if (res.getRow() > 0) {
+            stmt = conn.prepareStatement("update sn set lastHttpTime = ? where sn = ?");
+            stmt.setString(1, utils.getCurrentTimeStr());
+            stmt.setString(2, request.getParameter("sn"));
+            if (stmt.executeUpdate() == 1) {
                 stmt = conn.prepareStatement("update addWx set isLa = 1, laTime = ?, laQunId = ? where wxid in (?)");
                 stmt.setInt(1, (int) (System.currentTimeMillis() / 1000));
                 stmt.setString(2, request.getParameter("qunid"));

@@ -2,23 +2,23 @@ package com.webServer;
 
 import com.common.config;
 import com.common.utils;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import org.apache.commons.fileupload.FileItem;
-import org.json.JSONObject;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
-@WebServlet({"/api/webServer/addTextResources"})
-public class addTextResources extends HttpServlet {
+@WebServlet({"/api/webServer/getLaQunHistory"})
+public class getLaQunHistory extends HttpServlet {
     /* Access modifiers changed, original: protected */
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("utf-8");
@@ -35,55 +35,60 @@ public class addTextResources extends HttpServlet {
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
-            Map map = utils.getFormData(request);
-            String resourceType = ((FileItem) map.get("resourceType")).getString("utf-8");
-            String[] sArr = utils.txt2array((FileItem) map.get("txtFile"));
+            String wxid = request.getParameter("wxid");
+            int page = Integer.valueOf(request.getParameter("page")) - 1;
+            int pageSize = Integer.valueOf(request.getParameter("pageSize"));
             conn = utils.getConnection();
-            stmt = conn.prepareStatement("delete from resource where type = ?");
-            stmt.setString(1, resourceType);
-            stmt.executeUpdate();
-            int saveCount = 0;
-            for (String resourceStr : sArr) {
-                try {
-                    if (!resourceStr.equals("")) {
-                        stmt = conn.prepareStatement("insert into resource (type, val, addTime) value(?, ?, ?)");
-                        stmt.setString(1, resourceType);
-                        stmt.setString(2, resourceStr);
-                        stmt.setString(3, utils.getCurrentTimeStr());
-                        if(stmt.executeUpdate() == 1) {
-                            saveCount++;
-                        }
-                    }
-                } catch (Exception e) {
-                    System.out.println(e.getMessage());
-                }
+            stmt = conn.prepareStatement("select * from laQunHistory where wxid like ? limit ?, ?");
+            stmt.setString(1, "%" + wxid + "%");
+            stmt.setInt(2, page);
+            stmt.setInt(3, pageSize);
+            ResultSet res = stmt.executeQuery();
+            JSONArray ja = new JSONArray();
+            while (res.next()) {
+                JSONObject jo = new JSONObject();
+                System.out.println(res.getString("wxid"));
+                jo.put("wxid", res.getString("wxid"));
+                jo.put("laTime", res.getString("laTime"));
+                jo.put("addTime", res.getString("addTime"));
+                jo.put("laNum", res.getString("laNum"));
+                ja.put(jo);
             }
             resJo.put("res", "success");
-            resJo.put("saveCount", saveCount);
-            stmt.close();
+            resJo.put("data", ja);
+
+            stmt = conn.prepareStatement("select count(*) as total from laQunHistory  where wxid like ?");
+            stmt.setString(1, "%" + wxid + "%");
+            res = stmt.executeQuery();
+            if (res.next()) {
+                resJo.put("total", res.getInt("total"));
+            }else{
+                resJo.put("total", 0);
+            }
+            res.close();
             if (conn != null) {
                 try {
                     conn.close();
-                } catch (Exception e2) {
+                } catch (Exception e) {
                 }
             }
             if (stmt != null) {
                 stmt.close();
             }
-        } catch (Exception e3) {
-            resJo.put("errInfo", utils.getExceptionMsg(e3));
+        } catch (Exception e2) {
             resJo.put("res", "fail");
+            resJo.put("errInfo", e2.getMessage());
             if (conn != null) {
                 try {
                     conn.close();
-                } catch (Exception e4) {
+                } catch (Exception e3) {
                 }
             }
         } catch (Throwable th) {
             if (conn != null) {
                 try {
                     conn.close();
-                } catch (Exception e5) {
+                } catch (Exception e4) {
                 }
             }
         }

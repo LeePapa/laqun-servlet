@@ -33,10 +33,16 @@ public class delTextResources extends HttpServlet {
         PreparedStatement stmt = null;
         try {
             conn = utils.getConnection();
-            stmt = conn.prepareStatement("delete from " + request.getParameter("resourcesType") + " where val = ?");
+            stmt = conn.prepareStatement("delete from  resource where val = ? and type = ?");
             stmt.setString(1, request.getParameter("val"));
-            stmt.execute();
-            resJo.put("res", "success");
+            stmt.setString(2, request.getParameter("resourceType"));
+            if(stmt.executeUpdate() == 1) {
+                resJo.put("res", "success");
+            }else {
+                resJo.put("res", "fail");
+                resJo.put("errInfo", "数据库删除失败");
+            }
+
             if (conn != null) {
                 try {
                     conn.close();
@@ -48,7 +54,7 @@ public class delTextResources extends HttpServlet {
             }
         } catch (Exception e2) {
             resJo.put("res", "fail");
-            resJo.put("errInfo", e2.getMessage());
+            resJo.put("errInfo", utils.getExceptionMsg(e2));
             if (conn != null) {
                 try {
                     conn.close();

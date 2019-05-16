@@ -8,6 +8,7 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Date;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -32,29 +33,30 @@ public class getAddQun extends HttpServlet {
         JSONObject wxJo = new JSONObject();
         Connection conn = null;
         PreparedStatement stmt = null;
-        String customer = request.getParameter("customer");
+//        String customer = request.getParameter("customer");
         String sn = request.getParameter("sn");
         int qunUseTimeout = Integer.valueOf(config.get("qunUseTimeout")).intValue() * 60;
-        String customerInParam = StringUtils.join(request.getParameter("customerArr").split(","), "','");
+//        String customerInParam = StringUtils.join(request.getParameter("customerArr").split(","), "','");
         try {
             conn = utils.getConnection();
-            stmt = conn.prepareStatement("select * from sn where sn = ? limit 1");
-            stmt.setString(1, sn);
-            ResultSet res = stmt.executeQuery();
-            res.last();
-            if (res.getRow() > 0) {
-                stmt = conn.prepareStatement("select * from addQun where isBad = 0 and customer in ('" + customerInParam + "') and laNum > laedNum and (isUse = 0 or unix_timestamp(now())-lastGetTime>?) limit 1");
+            stmt = conn.prepareStatement("update sn set lastHttpTime = ? where sn = ?");
+            stmt.setString(1, utils.getCurrentTimeStr());
+            stmt.setString(2, request.getParameter("sn"));
+            if (stmt.executeUpdate() == 1) {
+//                stmt = conn.prepareStatement("select * from addQun where isBad = 0 and customer in ('" + customerInParam + "') and laNum > laedNum and (isUse = 0 or unix_timestamp(now())-lastGetTime>?) limit 1");
+                stmt = conn.prepareStatement("select * from addQun where isBad = 0 and  laNum > laedNum and (isUse = 0 or unix_timestamp(now())-lastGetTime>?) limit 1");
                 stmt.setInt(1, qunUseTimeout);
-                res = stmt.executeQuery();
+                ResultSet res = stmt.executeQuery();
                 if (res.next()) {
                     JSONObject wxJo2 = new JSONObject();
                     try {
                         String qunQr = res.getString("qunQr");
                         wxJo2.put("qunQr", qunQr);
-                        wxJo2.put("customer", res.getString("customer"));
+//                        wxJo2.put("customer", res.getString("customer"));
                         wxJo2.put("canLaNum", res.getInt("laNum") - res.getInt("laedNum"));
-                        stmt = conn.prepareStatement("update addQun set isUse = 1, lastGetTime = unix_timestamp(now()) where qunQr = ?");
-                        stmt.setString(1, qunQr);
+                        stmt = conn.prepareStatement("update addQun set sn = ?, isUse = 1, lastGetTime = unix_timestamp(now()) where qunQr = ?");
+                        stmt.setString(1, sn);
+                        stmt.setString(2, qunQr);
                         stmt.executeUpdate();
                         resJo.put("res", "群获取成功");
                         resJo.put("data", wxJo2);
@@ -97,7 +99,8 @@ public class getAddQun extends HttpServlet {
                         }
                     }
                 }
-                stmt = conn.prepareStatement("select * from addQun where customer in ('" + customerInParam + "') and laNum > laedNum limit 1");
+//                stmt = conn.prepareStatement("select * from addQun where customer in ('" + customerInParam + "') and laNum > laedNum limit 1");
+                stmt = conn.prepareStatement("select * from addQun where laNum > laedNum limit 1");
                 if (stmt.executeQuery().next()) {
                     resJo.put("res", "请等待群被使用完毕");
                 } else {

@@ -24,20 +24,32 @@ public class updateJob extends HttpServlet {
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
+            getServletContext().log(request.getParameter("jobName"));
+            System.out.println(request.getParameter("jobName"));
             conn = utils.getConnection();
-            stmt = conn.prepareStatement("update sn set jobName = ?, stopContent = ? where sn = ?");
-            stmt.setString(1, request.getParameter("jobName"));
-            stmt.setString(2, request.getParameter("stopContent") == null ? "" : request.getParameter("stopContent"));
-            stmt.setString(3, request.getParameter("sn"));
-            stmt.execute();
-            if (request.getParameter("jobName").equals("任务已停止")) {
-                stmt = conn.prepareStatement("insert into jobStopLog (sn, jobName, stopContent) value(?, ?, ?)");
-                stmt.setString(1, request.getParameter("sn"));
-                stmt.setString(2, request.getParameter("jobName"));
-                stmt.setString(3, request.getParameter("stopContent"));
+            stmt = conn.prepareStatement("update sn set lastHttpTime = ? where sn = ?");
+            stmt.setString(1, utils.getCurrentTimeStr());
+            stmt.setString(2, request.getParameter("sn"));
+            if (stmt.executeUpdate() == 1) {
+                System.out.println(request.getParameter("jobName"));
+                stmt = conn.prepareStatement("update sn set jobName = ?, stopContent = ? where sn = ?");
+                stmt.setString(1, request.getParameter("jobName"));
+                stmt.setString(2, request.getParameter("stopContent") == null ? "" : request.getParameter("stopContent"));
+                stmt.setString(3, request.getParameter("sn"));
                 stmt.execute();
+                if (request.getParameter("jobName").equals("任务已停止")) {
+                    stmt = conn.prepareStatement("insert into jobStopLog (sn, jobName, stopContent) value(?, ?, ?)");
+                    stmt.setString(1, request.getParameter("sn"));
+                    stmt.setString(2, request.getParameter("jobName"));
+                    stmt.setString(3, request.getParameter("stopContent"));
+                    stmt.execute();
+                }
+                resJo.put("res", "success");
+            } else {
+                resJo.put("res", "fail");
+                resJo.put("errInfo", "noSn" + request.getParameter("sn"));
             }
-            resJo.put("res", "success");
+
             if (conn != null) {
                 try {
                     conn.close();

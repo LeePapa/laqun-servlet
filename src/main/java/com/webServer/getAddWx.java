@@ -34,7 +34,9 @@ public class getAddWx extends HttpServlet {
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
+            getServletContext().log("start connect db...");
             conn = utils.getConnection();
+            getServletContext().log("db is connected");
             stmt = conn.prepareStatement("select * from addWx where phone like ? limit ?, ?");
             stmt.setString(1, "%" + request.getParameter("searchPhone") + "%");
             stmt.setInt(2, (Integer.valueOf(request.getParameter("page"))-1)*10);

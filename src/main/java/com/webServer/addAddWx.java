@@ -44,7 +44,9 @@ public class addAddWx extends HttpServlet {
             String customer = ((FileItem) map.get("customer")).getString("utf-8");
             String priority = ((FileItem) map.get("priority")).getString("utf-8");
             String[] sArr = utils.txt2array((FileItem) map.get("txtFile"));
+            getServletContext().log("start connect db...");
             conn = utils.getConnection();
+            getServletContext().log("db is connected");
             stmt = conn.prepareStatement("select * from addWx");
             ResultSet res = stmt.executeQuery();
             res.last();
@@ -53,13 +55,16 @@ public class addAddWx extends HttpServlet {
                 try {
                     System.out.println(sArr[i]);
                     if (!sArr[i].equals("")) {
-                        stmt = conn.prepareStatement("insert into addWx(phone, priority, customer) value(?, ?, ?)");
+                        System.out.println("start add: " + sArr[i]);
+                        stmt = conn.prepareStatement("insert into addWx(phone, priority, customer, avatar) value(?, ?, ?, ?)");
                         stmt.setString(1, sArr[i]);
                         stmt.setInt(2, Integer.valueOf(priority).intValue());
                         stmt.setString(3, customer);
-                        stmt.execute();
+                        stmt.setString(4, "");
+                        System.out.println("add success: " + stmt.executeUpdate());
                     }
                 } catch (Exception e) {
+                    e.printStackTrace();
                     getServletContext().log("add addWx err: " + e.getMessage());
                 }
             }

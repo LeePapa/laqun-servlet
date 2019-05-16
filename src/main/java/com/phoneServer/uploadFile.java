@@ -5,6 +5,8 @@ import com.common.utils;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -22,13 +24,25 @@ public class uploadFile extends HttpServlet {
         response.setContentType("application/json;charset=utf-8");
         PrintWriter pw = response.getWriter();
         JSONObject resJo = new JSONObject();
+        Connection conn = null;
+        PreparedStatement stmt = null;
         try {
-            Map map = utils.getFormData(request);
-            String fileName = ((FileItem) map.get("fileName")).getString("utf-8");
-            FileItem fi = (FileItem) map.get("file");
-            System.out.println(fileName);
-            fi.write(new File(utils.webPath + "/phoneFile/" + fileName));
-            resJo.put("res", "success");
+            conn = utils.getConnection();
+            stmt = conn.prepareStatement("update sn set lastHttpTime = ? where sn = ?");
+            stmt.setString(1, utils.getCurrentTimeStr());
+            stmt.setString(2, request.getParameter("sn"));
+            if (stmt.executeUpdate() == 1) {
+                Map map = utils.getFormData(request);
+                String fileName = ((FileItem) map.get("fileName")).getString("utf-8");
+                FileItem fi = (FileItem) map.get("file");
+                System.out.println(fileName);
+                fi.write(new File(utils.webPath + "/phoneFile/" + fileName));
+                resJo.put("res", "success");
+            } else {
+                resJo.put("res", "fail");
+                resJo.put("errInfo", "noSn" + request.getParameter("sn"));
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             resJo.put("res", "fail");

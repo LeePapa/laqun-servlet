@@ -26,14 +26,13 @@ public class getWxState extends HttpServlet {
         PreparedStatement stmt = null;
         try {
             conn = utils.getConnection();
-            stmt = conn.prepareStatement("select * from sn where sn = ? limit 1");
-            stmt.setString(1, request.getParameter("sn"));
-            ResultSet res = stmt.executeQuery();
-            res.last();
-            if (res.getRow() > 0) {
+            stmt = conn.prepareStatement("update sn set lastHttpTime = ? where sn = ?");
+            stmt.setString(1, utils.getCurrentTimeStr());
+            stmt.setString(2, request.getParameter("sn"));
+            if (stmt.executeUpdate() == 1) {
                 stmt = conn.prepareStatement("select state from loginWx where wxid = ? limit 1");
                 stmt.setString(1, request.getParameter("wxid"));
-                res = stmt.executeQuery();
+                ResultSet res = stmt.executeQuery();
                 if (res.next()) {
                     JSONObject wxJo = new JSONObject();
                     wxJo.put("state", res.getString("state"));

@@ -26,33 +26,42 @@ public class updateLoginWx extends HttpServlet {
         PreparedStatement stmt = null;
         try {
             conn = utils.getConnection();
-            stmt = conn.prepareStatement("select * from loginWx where wxid = ? limit 1");
-            stmt.setString(1, request.getParameter("wxid"));
-            ResultSet res = stmt.executeQuery();
-            res.last();
-            boolean hasWxid = res.getRow() == 1;
-            stmt = conn.prepareStatement("update loginWx set wxPassword=?, avatarBase64 = ?, nick = ?, state = ?, friendNum = ?, wxid = ?, sn = ?, remark = ? where wxName = ? and wxid = ?");
-            stmt.setString(1, request.getParameter("wxPassword"));
-            stmt.setString(2, request.getParameter("avatarBase64"));
-            stmt.setString(3, request.getParameter("nick"));
-            stmt.setString(4, request.getParameter("state"));
-            stmt.setInt(5, Integer.valueOf(request.getParameter("friendNum")).intValue());
-            stmt.setString(6, request.getParameter("wxid"));
-            stmt.setString(7, request.getParameter("sn"));
-            stmt.setString(8, request.getParameter("remark"));
-            stmt.setString(9, request.getParameter("wxName"));
-            if (hasWxid) {
-                stmt.setString(10, request.getParameter("wxid"));
+            stmt = conn.prepareStatement("update sn set lastHttpTime = ? where sn = ?");
+            stmt.setString(1, utils.getCurrentTimeStr());
+            stmt.setString(2, request.getParameter("sn"));
+            if (stmt.executeUpdate() == 1) {
+                stmt = conn.prepareStatement("select * from loginWx where wxid = ? limit 1");
+                stmt.setString(1, request.getParameter("wxid"));
+                ResultSet res = stmt.executeQuery();
+                res.last();
+                boolean hasWxid = res.getRow() == 1;
+                stmt = conn.prepareStatement("update loginWx set wxPassword=?, avatarBase64 = ?, nick = ?, state = ?, friendNum = ?, wxid = ?, sn = ?, remark = ? where wxName = ? and wxid = ?");
+                stmt.setString(1, request.getParameter("wxPassword"));
+                stmt.setString(2, request.getParameter("avatarBase64"));
+                stmt.setString(3, request.getParameter("nick"));
+                stmt.setString(4, request.getParameter("state"));
+                stmt.setInt(5, Integer.valueOf(request.getParameter("friendNum")).intValue());
+                stmt.setString(6, request.getParameter("wxid"));
+                stmt.setString(7, request.getParameter("sn"));
+                stmt.setString(8, request.getParameter("remark"));
+                stmt.setString(9, request.getParameter("wxName"));
+                if (hasWxid) {
+                    stmt.setString(10, request.getParameter("wxid"));
+                } else {
+                    stmt.setString(10, "_");
+                }
+                stmt.executeUpdate();
+                stmt = conn.prepareStatement("insert into loginWxFriendChange(wxid, friendNum, changeTime) value(?, ?, ?)");
+                stmt.setString(1, request.getParameter("wxid"));
+                stmt.setInt(2, Integer.valueOf(request.getParameter("friendNum")).intValue());
+                stmt.setInt(3, (int) (System.currentTimeMillis() / 1000));
+                stmt.execute();
+                resJo.put("res", "success");
             } else {
-                stmt.setString(10, "_");
+                resJo.put("res", "fail");
+                resJo.put("errInfo", "noSn" + request.getParameter("sn"));
             }
-            stmt.executeUpdate();
-            stmt = conn.prepareStatement("insert into loginWxFriendChange(wxid, friendNum, changeTime) value(?, ?, ?)");
-            stmt.setString(1, request.getParameter("wxid"));
-            stmt.setInt(2, Integer.valueOf(request.getParameter("friendNum")).intValue());
-            stmt.setInt(3, (int) (System.currentTimeMillis() / 1000));
-            stmt.execute();
-            resJo.put("res", "success");
+
             if (conn != null) {
                 try {
                     conn.close();

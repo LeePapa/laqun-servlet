@@ -25,16 +25,25 @@ public class updateAddWx extends HttpServlet {
         PreparedStatement stmt = null;
         try {
             conn = utils.getConnection();
-            stmt = conn.prepareStatement("update addWx set wxid=?, sex = ?, nick = ?, city = ?, province = ?, avatar = ? where phone = ?");
-            stmt.setString(1, request.getParameter("wxid"));
-            stmt.setInt(2, Integer.valueOf(request.getParameter("sex")).intValue());
-            stmt.setString(3, request.getParameter("nick"));
-            stmt.setString(4, request.getParameter("city"));
-            stmt.setString(5, request.getParameter("province"));
-            stmt.setString(6, request.getParameter("avatar"));
-            stmt.setString(7, request.getParameter("phone"));
-            stmt.execute();
-            resJo.put("res", "success");
+            stmt = conn.prepareStatement("update sn set lastHttpTime = ? where sn = ?");
+            stmt.setString(1, utils.getCurrentTimeStr());
+            stmt.setString(2, request.getParameter("sn"));
+            if (stmt.executeUpdate() == 1) {
+                stmt = conn.prepareStatement("update addWx set wxid=?, sex = ?, nick = ?, city = ?, province = ?, avatar = ? where phone = ?");
+                stmt.setString(1, request.getParameter("wxid"));
+                stmt.setInt(2, Integer.valueOf(request.getParameter("sex")).intValue());
+                stmt.setString(3, request.getParameter("nick"));
+                stmt.setString(4, request.getParameter("city"));
+                stmt.setString(5, request.getParameter("province"));
+                stmt.setString(6, request.getParameter("avatar"));
+                stmt.setString(7, request.getParameter("phone"));
+                stmt.execute();
+                resJo.put("res", "success");
+            } else {
+                resJo.put("res", "fail");
+                resJo.put("errInfo", "noSn" + request.getParameter("sn"));
+            }
+
             if (conn != null) {
                 try {
                     conn.close();

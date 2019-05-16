@@ -42,7 +42,8 @@ public class clearImg extends HttpServlet {
             String resourceType = request.getParameter("resourceType");
             conn = utils.getConnection();
             //先取出全部图片key，用于删除对象存储里面的
-            stmt = conn.prepareStatement("select * from " + resourceType);
+            stmt = conn.prepareStatement("select * from resource where type =  ?");
+            stmt.setString(1, resourceType);
             ResultSet res = stmt.executeQuery();
             JSONArray ja = new JSONArray();
             while (res.next()) {
@@ -50,12 +51,10 @@ public class clearImg extends HttpServlet {
                 jo.put("Key", res.getString("val"));
                 ja.put(jo);
             }
-            JSONObject jo = new JSONObject();
-            jo.put("Key", "a.jpg");
-            ja.put(jo);
             resJo.put("data", ja);
-            stmt = conn.prepareStatement("truncate " + resourceType);
-            stmt.execute();
+            stmt = conn.prepareStatement("delete from resource where type = ?");
+            stmt.setString(1, resourceType);
+            stmt.executeUpdate();
 
             resJo.put("res", "success");
             if (conn != null) {

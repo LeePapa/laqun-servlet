@@ -33,26 +33,35 @@ public class getIp extends HttpServlet {
         }
         try {
             conn = utils.getConnection();
-            stmt = conn.prepareStatement("select * from ipConf where ipAddr = ? limit 1");
-            stmt.setString(1, ipAddr);
-            ResultSet res = stmt.executeQuery();
-            if (res.next()) {
-                if ((System.currentTimeMillis() / 1000) - ((long) res.getInt("lastUseTime")) > ((long) (Integer.valueOf(config.get("ipUseTime")).intValue() * 60))) {
-                    resJo.put("res", "success");
-                    stmt = conn.prepareStatement("update ipConf set useNum = useNum + 1, lastUseTime = unix_timestamp(now()) where ipAddr = ?");
-                    stmt.setString(1, ipAddr);
-                    stmt.execute();
-                } else {
-                    resJo.put("res", "fail");
-                    resJo.put("errInfo", "时间未到期");
-                }
-            } else {
-                stmt = conn.prepareStatement("insert into ipConf(ipAddr, lastUseTime) value(?, ?)");
+            stmt = conn.prepareStatement("update sn set lastHttpTime = ? where sn = ?");
+            stmt.setString(1, utils.getCurrentTimeStr());
+            stmt.setString(2, request.getParameter("sn"));
+            if (stmt.executeUpdate() == 1) {
+                stmt = conn.prepareStatement("select * from ipConf where ipAddr = ? limit 1");
                 stmt.setString(1, ipAddr);
-                stmt.setInt(2, (int) (System.currentTimeMillis() / 1000));
-                stmt.execute();
-                resJo.put("res", "success");
+                ResultSet res = stmt.executeQuery();
+                if (res.next()) {
+                    if ((System.currentTimeMillis() / 1000) - ((long) res.getInt("lastUseTime")) > ((long) (Integer.valueOf(config.get("ipUseTime")).intValue() * 60))) {
+                        resJo.put("res", "success");
+                        stmt = conn.prepareStatement("update ipConf set useNum = useNum + 1, lastUseTime = unix_timestamp(now()) where ipAddr = ?");
+                        stmt.setString(1, ipAddr);
+                        stmt.execute();
+                    } else {
+                        resJo.put("res", "fail");
+                        resJo.put("errInfo", "时间未到期");
+                    }
+                } else {
+                    stmt = conn.prepareStatement("insert into ipConf(ipAddr, lastUseTime) value(?, ?)");
+                    stmt.setString(1, ipAddr);
+                    stmt.setInt(2, (int) (System.currentTimeMillis() / 1000));
+                    stmt.execute();
+                    resJo.put("res", "success");
+                }
+            }else {
+                resJo.put("res", "fail");
+                resJo.put("errInfo", "noSn" + request.getParameter("sn"));
             }
+
             if (conn != null) {
                 try {
                     conn.close();

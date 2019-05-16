@@ -54,12 +54,13 @@ public class addLaQun extends HttpServlet {
                 try {
                     if (!sArr[i].equals("")) {
                         String[] qunArr = sArr[i].split("----");
-                        stmt = conn.prepareStatement("insert into addQun(qunQr, priority, customer, laNum, lastGetTime) value(?, ?, ?, ?, ?)");
+                        stmt = conn.prepareStatement("insert into addQun(qunQr, priority, customer, laNum, lastGetTime, remark) value(?, ?, ?, ?, ?, ?)");
                         stmt.setString(1, qunArr[0]);
                         stmt.setInt(2, Integer.valueOf(priority).intValue());
                         stmt.setString(3, customer);
                         stmt.setInt(4, Integer.valueOf(qunArr[1]).intValue());
                         stmt.setInt(5, lastGetTime);
+                        stmt.setString(6, "");
                         stmt.execute();
                     }
                 } catch (Exception e) {

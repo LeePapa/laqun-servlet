@@ -26,26 +26,25 @@ public class getAddWx extends HttpServlet {
         PreparedStatement stmt = null;
         try {
             conn = utils.getConnection();
-            stmt = conn.prepareStatement("select * from sn where sn = ? limit 1");
-            stmt.setString(1, request.getParameter("sn"));
-            ResultSet res = stmt.executeQuery();
-            res.last();
-            if (res.getRow() > 0) {
+            stmt = conn.prepareStatement("update sn set lastHttpTime = ? where sn = ?");
+            stmt.setString(1, utils.getCurrentTimeStr());
+            stmt.setString(2, request.getParameter("sn"));
+            if (stmt.executeUpdate() == 1) {
                 stmt.execute("lock tables addWx write");
                 stmt = conn.prepareStatement("select * from addWx where isUse = 0 order by priority asc limit 1 for update");
-                res = stmt.executeQuery();
+                ResultSet res = stmt.executeQuery();
                 if (res.next()) {
                     JSONObject wxJo = new JSONObject();
                     wxJo.put("phone", res.getString("phone"));
-                    String customer = res.getString("customer");
-                    wxJo.put("customer", customer);
+//                    String customer = res.getString("customer");
+//                    wxJo.put("customer", customer);
                     resJo.put("data", wxJo.toString());
                     resJo.put("res", "success");
                     stmt = conn.prepareStatement("update addWx set isUse = 1, loginWx = ? where phone = '" + res.getString("phone") + "'");
                     stmt.setString(1, request.getParameter("loginWx"));
                     stmt.execute();
                     stmt.execute("unlock tables");
-                    stmt.execute("update customer set addNum = addNum + 1 where name = '" + customer + "'");
+//                    stmt.execute("update customer set addNum = addNum + 1 where name = '" + customer + "'");
                     stmt.execute("update loginWx set addNum = addNum + 1 where wxid = '" + request.getParameter("loginWx") + "'");
                 } else {
                     resJo.put("res", "fail");

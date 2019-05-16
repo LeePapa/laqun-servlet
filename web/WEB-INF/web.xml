@@ -17,4 +17,13 @@
         <listener-class>com.common.myInit</listener-class>
     </listener>
 
+    <!--<filter>-->
+        <!--<filter-name>PhoneSn</filter-name>-->
+        <!--<filter-class>com.common.PhoneSnFilter</filter-class>-->
+    <!--</filter>-->
+    <!--<filter-mapping>-->
+        <!--<filter-name>PhoneSn</filter-name>-->
+        <!--<url-pattern>/api/phoneServer/*</url-pattern>-->
+    <!--</filter-mapping>-->
+
 </web-app>
