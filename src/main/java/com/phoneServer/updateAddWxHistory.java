@@ -27,31 +27,31 @@ public class updateAddWxHistory extends HttpServlet {
         PreparedStatement stmt = null;
         ResultSet res = null;
         try {
-            String[] wxidArr= request.getParameter("wxidlist").split(",");
+            String wxid= request.getParameter("wxid");
+            String remark = request.getParameter("remark");
             conn = utils.getConnection();
             stmt = conn.prepareStatement("update sn set lastHttpTime = ? where sn = ?");
             stmt.setString(1, utils.getCurrentTimeStr());
             stmt.setString(2, request.getParameter("sn"));
             if (stmt.executeUpdate() == 1) {
-                for (int i=0; i<wxidArr.length; i++) {
-                    System.out.println(wxidArr[i]);
-                    stmt = conn.prepareStatement("select * from addWxHistory where wxid = ? limit 1");
-                    stmt.setString(1, wxidArr[i]);
-                    res = stmt.executeQuery();
-                    if(res.next()) {
-                        System.out.println("update: " + res.getString("addTime"));
-                        stmt = conn.prepareStatement("update addWxHistory set addNum = addNum + 1, goAddTime = ?  where wxid = ?");
-                        stmt.setString(1, utils.getCurrentTimeStr());
-                        stmt.setString(2, wxidArr[i]);
-                    }else{
-                        System.out.println("insert");
-                        stmt = conn.prepareStatement("insert into addWxHistory(wxid, addNum, addTime, goAddTime) values(?, 1, ?, ?)");
-                        stmt.setString(1, wxidArr[i]);
-                        stmt.setString(2, utils.getCurrentTimeStr());
-                        stmt.setString(3, utils.getCurrentTimeStr());
-                    }
-                    stmt.executeUpdate();
+                stmt = conn.prepareStatement("select * from addWxHistory where wxid = ? limit 1");
+                stmt.setString(1, wxid);
+                res = stmt.executeQuery();
+                if(res.next()) {
+                    System.out.println("update: " + res.getString("addTime"));
+                    stmt = conn.prepareStatement("update addWxHistory set addNum = addNum + 1, goAddTime = ?, remark = ? where wxid = ?");
+                    stmt.setString(1, utils.getCurrentTimeStr());
+                    stmt.setString(2, remark);
+                    stmt.setString(3, wxid);
+                }else{
+                    System.out.println("insert");
+                    stmt = conn.prepareStatement("insert into addWxHistory(wxid, addNum, addTime, goAddTime, remark) values(?, 1, ?, ?, ?)");
+                    stmt.setString(1, wxid);
+                    stmt.setString(2, utils.getCurrentTimeStr());
+                    stmt.setString(3, utils.getCurrentTimeStr());
+                    stmt.setString(4, remark);
                 }
+                stmt.executeUpdate();
                 resJo.put("res", "success");
             }else{
                 resJo.put("res", "fail");

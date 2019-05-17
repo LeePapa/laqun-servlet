@@ -51,6 +51,7 @@ public class getAddWxHistory extends HttpServlet {
                 jo.put("goAddTime", res.getString("goAddTime"));
                 jo.put("addTime", res.getString("addTime"));
                 jo.put("addNum", res.getString("addNum"));
+                jo.put("remark", res.getString("remark"));
                 ja.put(jo);
             }
             resJo.put("res", "success");

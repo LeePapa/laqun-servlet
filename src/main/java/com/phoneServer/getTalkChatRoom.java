@@ -86,8 +86,10 @@ public class getTalkChatRoom extends HttpServlet {
                             stmt.close();
                         }
                     }
+                }else{
+                    resJo.put("res", "没有可用互聊群");
                 }
-                resJo.put("res", "没有可用互聊群");
+
             } else {
                 resJo.put("res", "fail");
                 resJo.put("errInfo", "sn不存在服务器： " + request.getParameter("sn"));

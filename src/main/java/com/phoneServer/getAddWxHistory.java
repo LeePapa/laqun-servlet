@@ -37,13 +37,15 @@ public class getAddWxHistory extends HttpServlet {
             if (stmt.executeUpdate() == 1) {
                 JSONArray ja = new JSONArray();
                 for (int i=0; i<wxidArr.length; i++) {
-                    stmt = conn.prepareStatement("select addNum from addWxHistory where wxid = ? limit 1");
+                    stmt = conn.prepareStatement("select addNum, remark from addWxHistory where wxid = ? limit 1");
                     stmt.setString(1, wxidArr[i]);
                     res = stmt.executeQuery();
                     JSONObject jo = new JSONObject();
                     if(res.next()) {
+                        jo.put("remark", res.getString("remark"));
                         jo.put(wxidArr[i], res.getString("addNum"));
                     }else{
+                        jo.put("remark", "");
                         jo.put(wxidArr[i], 0);
                     }
                     ja.put(jo);

@@ -38,8 +38,9 @@ public class getResource extends HttpServlet {
             stmt.setString(1, utils.getCurrentTimeStr());
             stmt.setString(2, request.getParameter("sn"));
             if (stmt.executeUpdate() == 1) {
-                stmt = conn.prepareStatement("select * from " + resourceType + " order by rand() limit ?");
-                stmt.setInt(1, resourcesNum);
+                stmt = conn.prepareStatement("select * from resource where type = ? order by rand() limit ?");
+                stmt.setString(1, resourceType);
+                stmt.setInt(2, resourcesNum);
                 ResultSet res = stmt.executeQuery();
                 JSONArray resJa = new JSONArray();
                 getServletContext().log("start put info");
