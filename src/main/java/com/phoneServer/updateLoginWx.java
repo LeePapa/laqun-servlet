@@ -30,12 +30,19 @@ public class updateLoginWx extends HttpServlet {
             stmt.setString(1, utils.getCurrentTimeStr());
             stmt.setString(2, request.getParameter("sn"));
             if (stmt.executeUpdate() == 1) {
+                String wxPasswordbak = request.getParameter("wxPasswordbak");
+
                 stmt = conn.prepareStatement("select * from loginWx where wxid = ? limit 1");
                 stmt.setString(1, request.getParameter("wxid"));
                 ResultSet res = stmt.executeQuery();
                 res.last();
+                //如果有备用密码，则更新语句里加上备用密码的更新
+                String sqlSetStr = "wxPassword=?, avatarBase64 = ?, nick = ?, state = ?, friendNum = ?, wxid = ?, sn = ?, remark = ?";
+                if (wxPasswordbak != null && !wxPasswordbak.equals("")) {
+                    sqlSetStr = "wxPassword=?, avatarBase64 = ?, nick = ?, state = ?, friendNum = ?, wxid = ?, sn = ?, remark = ?, wxPasswordbak = '" + wxPasswordbak + "'";
+                }
                 boolean hasWxid = res.getRow() == 1;
-                stmt = conn.prepareStatement("update loginWx set wxPassword=?, avatarBase64 = ?, nick = ?, state = ?, friendNum = ?, wxid = ?, sn = ?, remark = ? where wxName = ? and wxid = ?");
+                stmt = conn.prepareStatement("update loginWx set " + sqlSetStr + " where wxName = ? and wxid = ?");
                 stmt.setString(1, request.getParameter("wxPassword"));
                 stmt.setString(2, request.getParameter("avatarBase64"));
                 stmt.setString(3, request.getParameter("nick"));
@@ -72,8 +79,8 @@ public class updateLoginWx extends HttpServlet {
                 stmt.close();
             }
         } catch (Exception e2) {
+            resJo.put("errInfo", utils.getExceptionMsg(e2));
             resJo.put("res", "fail");
-            resJo.put("errInfo", e2.getMessage());
             if (conn != null) {
                 try {
                     conn.close();

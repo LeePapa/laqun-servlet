@@ -45,7 +45,7 @@ public class addLoginWx extends HttpServlet {
             for (int i = 0; i < sArr.length; i++) {
                 try {
                     if (!sArr[i].equals("")) {
-                        stmt = conn.prepareStatement("insert into loginWx(wxName, wxPassword, yjInfo, wxid, lastGetTime, remark) value(?, ?, ?, ?, ?, ?)");
+                        stmt = conn.prepareStatement("insert into loginWx(wxName, wxPassword, yjInfo, wxid, lastGetTime, remark, wxPasswordbak) value(?, ?, ?, ?, ?, ?, '')");
                         String[] wxArr = sArr[i].split("----");
                         stmt.setString(1, wxArr[0]);
                         stmt.setString(2, wxArr[1]);

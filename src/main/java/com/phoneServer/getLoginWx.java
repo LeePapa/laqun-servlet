@@ -50,6 +50,7 @@ public class getLoginWx extends HttpServlet {
                         JSONObject wxJo = new JSONObject();
                         wxJo.put("wxName", res.getString("wxName"));
                         wxJo.put("wxPassword", res.getString("wxPassword"));
+                        wxJo.put("wxPasswordbak", res.getString("wxPasswordbak"));
                         wxJo.put("yjInfo", res.getString("yjInfo"));
                         wxJo.put("wxid", res.getString("wxid"));
                         stmt = conn.prepareStatement("update loginWx set state='正在登录', sn=?, lastGetTime = ? where wxid = ? and wxName='" + res.getString("wxName") + "'");

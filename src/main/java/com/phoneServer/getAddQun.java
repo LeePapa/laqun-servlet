@@ -98,14 +98,16 @@ public class getAddQun extends HttpServlet {
                             stmt.close();
                         }
                     }
+                }else{
+                    //                stmt = conn.prepareStatement("select * from addQun where customer in ('" + customerInParam + "') and laNum > laedNum limit 1");
+                    stmt = conn.prepareStatement("select * from addQun where laNum > laedNum limit 1");
+                    if (stmt.executeQuery().next()) {
+                        resJo.put("res", "请等待群被使用完毕");
+                    }else {
+                        resJo.put("res", "全部群被拉满");
+                    }
                 }
-//                stmt = conn.prepareStatement("select * from addQun where customer in ('" + customerInParam + "') and laNum > laedNum limit 1");
-                stmt = conn.prepareStatement("select * from addQun where laNum > laedNum limit 1");
-                if (stmt.executeQuery().next()) {
-                    resJo.put("res", "请等待群被使用完毕");
-                } else {
-                    resJo.put("res", "全部群被拉满");
-                }
+
             } else {
                 resJo.put("res", "fail");
                 resJo.put("errInfo", "sn不存在服务器： " + request.getParameter("sn"));

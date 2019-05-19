@@ -45,16 +45,13 @@ public class generalExcel extends HttpServlet {
         HttpSession session = request.getSession();
         if (session.getAttribute("loginPassword") != null) {
             if (session.getAttribute("loginPassword").equals(config.get("loginPassword"))) {
-                String[] customerArr = request.getParameter("customerArr").split(",");
                 String qunWhere = request.getParameter("excelType").equals("已拉完的群") ? "laNum = laedNum and isGeneral = 0" : "laNum > laedNum";
                 try {
                     WritableWorkbook wwb = Workbook.createWorkbook(new File(utils.webPath + excelFileName));
                     cellView.setAutosize(true);
                     conn = utils.getConnection();
-                    for (int i = 0; i < customerArr.length; i++) {
-                        stmt = conn.prepareStatement("select * from addQun where customer = ? and " + qunWhere);
-                        stmt.setString(1, customerArr[i]);
-                        WritableSheet sheet = wwb.createSheet(customerArr[i], i);
+                        stmt = conn.prepareStatement("select * from addQun where  " + qunWhere);
+                        WritableSheet sheet = wwb.createSheet("0", 0);
                         for (int j = 0; j < 7; j++) {
                             sheet.setColumnView(j, cellView);
                         }
@@ -171,7 +168,6 @@ public class generalExcel extends HttpServlet {
                                 }
                             }
                         }
-                    }
                     wwb.write();
                     wwb.close();
                     resJo.put("excelFileName", excelFileName);

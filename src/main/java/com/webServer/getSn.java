@@ -43,7 +43,7 @@ public class getSn extends HttpServlet {
             JSONArray ja = new JSONArray();
             while (res.next()) {
                 JSONObject jo = new JSONObject();
-                jo.put("idnpm start", res.getString("id"));
+                jo.put("id", res.getString("id"));
                 jo.put("sn", res.getString("sn"));
                 jo.put("remark", res.getString("remark"));
                 jo.put("addTime", res.getString("addTime"));
