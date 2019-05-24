@@ -75,7 +75,8 @@ public class addLoginWx extends HttpServlet {
                 stmt.close();
             }
         } catch (Exception e3) {
-            resJo.put("errInfo", e3.getMessage());
+            resJo.put("errInfo", utils.getExceptionMsg(e3));
+            resJo.put("res", "fail");
             if (conn != null) {
                 try {
                     conn.close();

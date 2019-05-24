@@ -1,5 +1,6 @@
 package com.phoneServer;
 
+import com.common.DbUtils;
 import com.common.InOutLog;
 import com.common.config;
 import com.common.utils;
@@ -18,75 +19,60 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-@WebServlet({"/api/phoneServer/getLaQunHistory"})
-public class getLaQunHistory extends HttpServlet {
+@WebServlet({"/api/phoneServer/getOkLoginWx"})
+public class getOkLoginWx extends HttpServlet {
     /* Access modifiers changed, original: protected */
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        getServletContext().log("start get oklogin ");
         request.setCharacterEncoding("utf-8");
         response.setContentType("application/json;charset=utf-8");
         PrintWriter pw = response.getWriter();
         JSONObject resJo = new JSONObject();
+        HttpSession session = request.getSession();
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet res = null;
+        String sn = request.getParameter("sn");
         try {
-            String[] wxidArr= request.getParameter("wxidlist").split(",");
+            getServletContext().log("start get oklogin ");
             conn = utils.getConnection();
-            stmt = conn.prepareStatement("update sn set lastHttpTime = ? where sn = ?");
+            stmt = conn.prepareStatement("update sn set lastHttpTime = ? where sn = ? limit 1");
             stmt.setString(1, utils.getCurrentTimeStr());
             stmt.setString(2, request.getParameter("sn"));
             if (stmt.executeUpdate() == 1) {
-                JSONArray ja = new JSONArray();
-                for (int i=0; i<wxidArr.length; i++) {
-                    stmt = conn.prepareStatement("select laNum from laQunHistory where wxid = ? limit 1");
-                    stmt.setString(1, wxidArr[i]);
-                    res = stmt.executeQuery();
+                getServletContext().log("start get oklogin ");
+                stmt = conn.prepareStatement("select * from loginWx where sn = ? and state = '正常'");
+                stmt.setString(1, sn);
+                res = stmt.executeQuery();
+                JSONArray dataJa = new JSONArray();
+                while (res.next()) {
                     JSONObject jo = new JSONObject();
-                    if(res.next()) {
-                        jo.put(wxidArr[i], res.getString("laNum"));
-                    }else{
-                        jo.put(wxidArr[i], 0);
-                    }
-                    ja.put(jo);
+                    getServletContext().log(res.getString("wxName"));
+                    jo.put("wxName", res.getString("wxName"));
+                    jo.put("wxPassword", res.getString("wxPassword"));
+                    jo.put("wxPasswordbak", res.getString("wxPasswordbak"));
+                    jo.put("wxid", res.getString("wxid"));
+                    jo.put("yjInfo", res.getString("yjInfo"));
+                    dataJa.put(jo);
                 }
+                resJo.put("data", dataJa);
                 resJo.put("res", "success");
-                resJo.put("data", ja);
-            }else{
-                resJo.put("errInfo", "noSn" + request.getParameter("sn"));
+            } else {
+                resJo.put("errInfo", "sn不存在" + sn);
                 resJo.put("res", "fail");
             }
 
-
-            res.close();
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (Exception e) {
-                }
-            }
-            if (stmt != null) {
-                stmt.close();
-            }
         } catch (Exception e2) {
             resJo.put("errInfo", utils.getExceptionMsg(e2));
             resJo.put("res", "fail");
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (Exception e3) {
-                }
-            }
-        } catch (Throwable th) {
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (Exception e4) {
-                }
-            }
+        }finally {
+            DbUtils.closeResultRes(res);
+            DbUtils.closePreStmt(stmt);
+            DbUtils.closeConnect(conn);
+            pw.println(resJo);
+            pw.close();
+            InOutLog.logInOut(request, resJo);
         }
-        InOutLog.logInOut(request, resJo);
-        pw.println(resJo);
-        pw.close();
     }
 
     /* Access modifiers changed, original: protected */

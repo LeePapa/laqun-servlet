@@ -46,8 +46,8 @@ public class updateJob extends HttpServlet {
                 }
                 resJo.put("res", "success");
             } else {
-                resJo.put("res", "fail");
                 resJo.put("errInfo", "noSn" + request.getParameter("sn"));
+                resJo.put("res", "fail");
             }
 
             if (conn != null) {
@@ -60,8 +60,8 @@ public class updateJob extends HttpServlet {
                 stmt.close();
             }
         } catch (Exception e2) {
+            resJo.put("errInfo", utils.getExceptionMsg(e2));
             resJo.put("res", "fail");
-            resJo.put("errInfo", e2.getMessage());
             if (conn != null) {
                 try {
                     conn.close();

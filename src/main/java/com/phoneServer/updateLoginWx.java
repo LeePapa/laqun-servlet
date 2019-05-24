@@ -65,8 +65,8 @@ public class updateLoginWx extends HttpServlet {
                 stmt.execute();
                 resJo.put("res", "success");
             } else {
-                resJo.put("res", "fail");
                 resJo.put("errInfo", "noSn" + request.getParameter("sn"));
+                resJo.put("res", "fail");
             }
 
             if (conn != null) {

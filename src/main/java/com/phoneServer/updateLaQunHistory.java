@@ -1,5 +1,6 @@
 package com.phoneServer;
 
+import com.common.InOutLog;
 import com.common.config;
 import com.common.utils;
 import org.json.JSONArray;
@@ -53,8 +54,8 @@ public class updateLaQunHistory extends HttpServlet {
                 }
                 resJo.put("res", "success");
             }else{
-                resJo.put("res", "fail");
                 resJo.put("errInfo", "noSn" + request.getParameter("sn"));
+                resJo.put("res", "fail");
             }
 
             res.close();
@@ -69,8 +70,8 @@ public class updateLaQunHistory extends HttpServlet {
             }
         } catch (Exception e2) {
             e2.printStackTrace();
-            resJo.put("res", "fail");
             resJo.put("errInfo", utils.getExceptionMsg(e2));
+            resJo.put("res", "fail");
             if (conn != null) {
                 try {
                     conn.close();
@@ -85,6 +86,7 @@ public class updateLaQunHistory extends HttpServlet {
                 }
             }
         }
+        InOutLog.logInOut(request, resJo);
         pw.println(resJo);
         pw.close();
     }

@@ -43,7 +43,6 @@ public class getResource extends HttpServlet {
                 stmt.setInt(2, resourcesNum);
                 ResultSet res = stmt.executeQuery();
                 JSONArray resJa = new JSONArray();
-                getServletContext().log("start put info");
                 while (res.next()) {
                     if (resourceType.equals("avatar") || resourceType.equals("backImg") || resourceType.equals("momentsImg")){
                         resJa.put("http://" + resourceType.toLowerCase() + utils.tpUriPre +  res.getString("val"));
@@ -60,8 +59,8 @@ public class getResource extends HttpServlet {
                 stmt.setString(2, request.getParameter("sn"));
                 stmt.executeUpdate();
             } else {
-                resJo.put("res", "fail");
                 resJo.put("errInfo", "noSn" + request.getParameter("sn"));
+                resJo.put("res", "fail");
             }
             if (conn != null) {
                 try {
@@ -74,8 +73,8 @@ public class getResource extends HttpServlet {
             }
         } catch (Exception e2) {
             e2.printStackTrace();
-            resJo.put("res", "fail");
             resJo.put("errInfo", utils.getExceptionMsg(e2));
+            resJo.put("res", "fail");
             if (conn != null) {
                 try {
                     conn.close();

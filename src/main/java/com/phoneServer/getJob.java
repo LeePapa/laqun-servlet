@@ -43,8 +43,8 @@ public class getJob extends HttpServlet {
                 wxJo.put("jobContent", res.getString("jobContent"));
                 resJo.put("data", wxJo);
             } else {
-                resJo.put("res", "fail");
                 resJo.put("errInfo", "noSn" + request.getParameter("sn"));
+                resJo.put("res", "fail");
             }
             if (conn != null) {
                 try {
@@ -56,8 +56,8 @@ public class getJob extends HttpServlet {
                 stmt.close();
             }
         } catch (Exception e2) {
+            resJo.put("errInfo", utils.getExceptionMsg(e2));
             resJo.put("res", "fail");
-            resJo.put("errInfo", e2.getMessage());
             if (conn != null) {
                 try {
                     conn.close();

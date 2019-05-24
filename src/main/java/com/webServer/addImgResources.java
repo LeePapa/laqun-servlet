@@ -58,8 +58,8 @@ public class addImgResources extends HttpServlet {
                 stmt.close();
             }
         } catch (Exception e2) {
-            resJo.put("res", "fail");
             resJo.put("errInfo", utils.getExceptionMsg(e2));
+            resJo.put("res", "fail");
             e2.printStackTrace();
             if (conn != null) {
                 try {

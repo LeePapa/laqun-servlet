@@ -13,9 +13,9 @@ public class DbUtils {
     public static void initDataSource() {
         p = new PoolProperties();
 //        p.setUrl("jdbc:mysql://172.16.0.16:3306/laqun?serverTimezone=GMT&characterEncoding=utf-8&useUnicode=true&useSSL=false");
-        p.setUrl("jdbc:mysql://tdsql-k3gjdmst.sql.tencentcdb.com:21/laqun?serverTimezone=GMT&characterEncoding=utf-8&useUnicode=true&useSSL=false");
+//        p.setUrl("jdbc:mysql://tdsql-k3gjdmst.sql.tencentcdb.com:21/laqun?serverTimezone=GMT&characterEncoding=utf-8&useUnicode=true&useSSL=false");
         p.setInitSQL("set names utf8mb4");
-//        p.setUrl("jdbc:mysql://localhost:3306/laqun?serverTimezone=GMT&characterEncoding=utf-8&useUnicode=true");
+        p.setUrl("jdbc:mysql://localhost:3306/laqun?serverTimezone=GMT&characterEncoding=utf-8&useUnicode=true");
         p.setDriverClassName("com.mysql.cj.jdbc.Driver");
         p.setUsername("laqun");
         p.setPassword("laqunQun1");
@@ -25,14 +25,14 @@ public class DbUtils {
         p.setTestOnReturn(false);
         p.setValidationInterval(30000);
         p.setTimeBetweenEvictionRunsMillis(30000);
-        p.setMaxActive(100);
-        p.setInitialSize(10);
-        p.setMaxWait(2000);
-        p.setRemoveAbandonedTimeout(60);
+        p.setMaxActive(300);//100
+        p.setInitialSize(20);//10
+        p.setMaxWait(10000); //ms
         p.setMinEvictableIdleTimeMillis(30000);
-        p.setMinIdle(10);
+        p.setMinIdle(20);//10
         p.setLogAbandoned(true);
-        p.setRemoveAbandoned(true);
+//        p.setRemoveAbandoned(true);
+        p.setRemoveAbandonedTimeout(300);//60，s
         p.setJdbcInterceptors("org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer");
         ds = new DataSource();
         ds.setPoolProperties(p);

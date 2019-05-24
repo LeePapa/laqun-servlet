@@ -47,8 +47,8 @@ public class getIp extends HttpServlet {
                         stmt.setString(1, ipAddr);
                         stmt.execute();
                     } else {
-                        resJo.put("res", "fail");
                         resJo.put("errInfo", "时间未到期");
+                        resJo.put("res", "fail");
                     }
                 } else {
                     stmt = conn.prepareStatement("insert into ipConf(ipAddr, lastUseTime) value(?, ?)");
@@ -58,8 +58,8 @@ public class getIp extends HttpServlet {
                     resJo.put("res", "success");
                 }
             }else {
-                resJo.put("res", "fail");
                 resJo.put("errInfo", "noSn" + request.getParameter("sn"));
+                resJo.put("res", "fail");
             }
 
             if (conn != null) {
@@ -72,8 +72,8 @@ public class getIp extends HttpServlet {
                 stmt.close();
             }
         } catch (Exception e2) {
+            resJo.put("errInfo", utils.getExceptionMsg(e2));
             resJo.put("res", "fail");
-            resJo.put("errInfo", e2.getMessage() + (System.currentTimeMillis() / 1000));
             if (conn != null) {
                 try {
                     conn.close();

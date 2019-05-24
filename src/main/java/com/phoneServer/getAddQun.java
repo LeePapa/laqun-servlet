@@ -65,8 +65,8 @@ public class getAddQun extends HttpServlet {
                         e = e2;
                         wxJo = wxJo2;
                         try {
+                            resJo.put("errInfo", utils.getExceptionMsg(e2));
                             resJo.put("res", "fail");
-                            resJo.put("errInfo", e.getMessage());
                             if (conn != null) {
                                 try {
                                     conn.close();
@@ -109,8 +109,8 @@ public class getAddQun extends HttpServlet {
                 }
 
             } else {
-                resJo.put("res", "fail");
                 resJo.put("errInfo", "sn不存在服务器： " + request.getParameter("sn"));
+                resJo.put("res", "fail");
             }
             if (conn != null) {
                 try {

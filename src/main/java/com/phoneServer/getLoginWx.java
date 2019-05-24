@@ -40,8 +40,8 @@ public class getLoginWx extends HttpServlet {
                 ResultSet res = stmt.executeQuery();
                 res.next();
                 if (res.getInt("loginWxNum") == Integer.valueOf(config.get("loginWxNum")).intValue()) {
-                    resJo.put("res", "fail");
                     resJo.put("errInfo", "本手机登录微信数量已达上限");
+                    resJo.put("res", "fail");
                 } else {
                     stmt = conn.prepareStatement("select * from loginWx where (state = '正在登录' and sn = ?) or sn='' limit 1");
                     stmt.setString(1, sn);
@@ -61,13 +61,13 @@ public class getLoginWx extends HttpServlet {
                         resJo.put("res", "success");
                         resJo.put("data", wxJo);
                     } else {
-                        resJo.put("res", "fail");
                         resJo.put("errInfo", "没有可用登录微信");
+                        resJo.put("res", "fail");
                     }
                 }
             } else {
-                resJo.put("res", "fail");
                 resJo.put("errInfo", "sn不存在" + sn);
+                resJo.put("res", "fail");
             }
             if (conn != null) {
                 try {
@@ -79,8 +79,8 @@ public class getLoginWx extends HttpServlet {
                 stmt.close();
             }
         } catch (Exception e2) {
+            resJo.put("errInfo", utils.getExceptionMsg(e2));
             resJo.put("res", "fail");
-            resJo.put("errInfo", e2.getMessage() + sn);
             if (conn != null) {
                 try {
                     conn.close();

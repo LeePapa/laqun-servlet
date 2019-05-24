@@ -24,27 +24,35 @@ public class getWxState extends HttpServlet {
         JSONObject resJo = new JSONObject();
         Connection conn = null;
         PreparedStatement stmt = null;
+        String wxid = request.getParameter("wxid");
+        String sn = request.getParameter("sn");
         try {
             conn = utils.getConnection();
             stmt = conn.prepareStatement("update sn set lastHttpTime = ? where sn = ?");
             stmt.setString(1, utils.getCurrentTimeStr());
             stmt.setString(2, request.getParameter("sn"));
             if (stmt.executeUpdate() == 1) {
-                stmt = conn.prepareStatement("select state from loginWx where wxid = ? limit 1");
-                stmt.setString(1, request.getParameter("wxid"));
+                stmt = conn.prepareStatement("select * from loginWx where wxid = ? limit 1");
+                stmt.setString(1, wxid);
                 ResultSet res = stmt.executeQuery();
                 if (res.next()) {
-                    JSONObject wxJo = new JSONObject();
-                    wxJo.put("state", res.getString("state"));
-                    resJo.put("data", wxJo.toString());
-                    resJo.put("res", "success");
+                    if (res.getString("sn").equals(sn)) {
+                        JSONObject wxJo = new JSONObject();
+                        wxJo.put("state", res.getString("state"));
+                        resJo.put("data", wxJo.toString());
+                        resJo.put("res", "success");
+                    }else{
+                        resJo.put("errInfo", "此微信号不在本手机");
+                        resJo.put("res", "fail");
+                    }
+
                 } else {
-                    resJo.put("res", "fail");
                     resJo.put("errInfo", "没有这个微信");
+                    resJo.put("res", "fail");
                 }
             } else {
-                resJo.put("res", "fail");
                 resJo.put("errInfo", "noSn" + request.getParameter("sn"));
+                resJo.put("res", "fail");
             }
             if (conn != null) {
                 try {
@@ -56,8 +64,8 @@ public class getWxState extends HttpServlet {
                 stmt.close();
             }
         } catch (Exception e2) {
+            resJo.put("errInfo", utils.getExceptionMsg(e2));
             resJo.put("res", "fail");
-            resJo.put("errInfo", e2.getMessage());
             if (conn != null) {
                 try {
                     conn.close();

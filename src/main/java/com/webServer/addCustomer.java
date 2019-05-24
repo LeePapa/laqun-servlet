@@ -29,8 +29,8 @@ public class addCustomer extends HttpServlet {
         PreparedStatement stmt = null;
         HttpSession session = request.getSession();
         if (session.getAttribute("loginPassword") == null || !session.getAttribute("loginPassword").equals(config.get("loginPassword"))) {
-            resJo.put("res", "fail");
             resJo.put("errInfo", "请先登录");
+            resJo.put("res", "fail");
             pw.println(resJo);
             return;
         }
@@ -41,8 +41,8 @@ public class addCustomer extends HttpServlet {
             if (stmt.executeUpdate() == 1) {
                 resJo.put("res", "success");
             } else {
-                resJo.put("res", "fail");
                 resJo.put("errInfo", "insert db fail");
+                resJo.put("res", "fail");
             }
             if (conn != null) {
                 try {
@@ -54,8 +54,8 @@ public class addCustomer extends HttpServlet {
                 stmt.close();
             }
         } catch (Exception e2) {
+            resJo.put("errInfo", utils.getExceptionMsg(e2));
             resJo.put("res", "fail");
-            resJo.put("errInfo", e2.getMessage());
             if (conn != null) {
                 try {
                     conn.close();

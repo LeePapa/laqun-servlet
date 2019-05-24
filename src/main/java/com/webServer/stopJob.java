@@ -34,7 +34,7 @@ public class stopJob extends HttpServlet {
         PreparedStatement stmt = null;
         try {
             conn = utils.getConnection();
-            stmt = conn.prepareStatement("select jobName from sn where sn = ?");
+            stmt = conn.prepareStatement("select jobName from sn where sn = ? limit 1");
             stmt.setString(1, request.getParameter("sn"));
             ResultSet res = stmt.executeQuery();
             if (!res.next()) {
@@ -45,6 +45,9 @@ public class stopJob extends HttpServlet {
                 stmt.setString(1, request.getParameter("sn"));
                 stmt.execute();
                 resJo.put("res", "success");
+            }else{
+                resJo.put("errInfo", "不要重复停止");
+                resJo.put("res", "errInfo");
             }
             if (conn != null) {
                 try {
@@ -56,8 +59,8 @@ public class stopJob extends HttpServlet {
                 stmt.close();
             }
         } catch (Exception e2) {
+            resJo.put("errInfo", utils.getExceptionMsg(e2));
             resJo.put("res", "fail");
-            resJo.put("errInfo", e2.getMessage());
             if (conn != null) {
                 try {
                     conn.close();

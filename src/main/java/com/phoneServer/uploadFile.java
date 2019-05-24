@@ -35,8 +35,8 @@ public class uploadFile extends HttpServlet {
             resJo.put("res", "success");
         } catch (Exception e) {
             e.printStackTrace();
+            resJo.put("errInfo", utils.getExceptionMsg(e));
             resJo.put("res", "fail");
-            resJo.put("errInfo", e.getMessage());
         }
         pw.println(resJo);
         pw.close();

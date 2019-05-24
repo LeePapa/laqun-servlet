@@ -42,12 +42,12 @@ public class getNews extends HttpServlet {
                     resJo.put("data", wxJo.toString());
                     resJo.put("res", "success");
                 } else {
-                    resJo.put("res", "fail");
                     resJo.put("errInfo", "没有可用新闻");
+                    resJo.put("res", "fail");
                 }
             } else {
-                resJo.put("res", "fail");
                 resJo.put("errInfo", "noSn" + request.getParameter("sn"));
+                resJo.put("res", "fail");
             }
             if (conn != null) {
                 try {
@@ -59,8 +59,8 @@ public class getNews extends HttpServlet {
                 stmt.close();
             }
         } catch (Exception e2) {
+            resJo.put("errInfo", utils.getExceptionMsg(e2));
             resJo.put("res", "fail");
-            resJo.put("errInfo", e2.getMessage());
             if (conn != null) {
                 try {
                     conn.close();

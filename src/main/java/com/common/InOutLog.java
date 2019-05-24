@@ -12,24 +12,19 @@ import java.util.Map;
 
 public class InOutLog {
     public static void logInOut(HttpServletRequest request, JSONObject resJo) {
-        String url = request.getRequestURI();
-        Map<String, String[]> reqMap = request.getParameterMap();
-        JSONObject reqJo = new JSONObject();
-        for(String k: reqMap.keySet()) {
-            reqJo.put(k, reqMap.get(k));
+        if (resJo.optString("res").equals("fail")) {
+            String url = request.getRequestURI();
+            Map<String, String[]> reqMap = request.getParameterMap();
+            JSONObject reqJo = new JSONObject();
+            for(String k: reqMap.keySet()) {
+                reqJo.put(k, reqMap.get(k));
+            }
+            request.getServletContext().log("=========================");
+            request.getServletContext().log(url);
+            request.getServletContext().log(reqJo.toString());
+            request.getServletContext().log(resJo.toString());
+            request.getServletContext().log("=========================");
         }
-        try {
-            Connection conn = utils.getConnection();
-            PreparedStatement stmt = conn.prepareStatement("insert into snHttpLog(sn, httpTime, request, response, httpUrl) values(?, ?, ?, ?, ?)");
-            stmt.setString(1, request.getParameter("sn"));
-            stmt.setString(2, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-            stmt.setString(3, reqJo.toString());
-            stmt.setString(4, resJo.toString());
-            stmt.setString(5, url);
-            System.out.println(stmt.executeUpdate());
-            if (conn != null) conn.close();
-        }catch (Exception e) {
-            e.printStackTrace();
-        }
+
     }
 }

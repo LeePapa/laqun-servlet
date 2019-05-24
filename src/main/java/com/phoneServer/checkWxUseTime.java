@@ -26,42 +26,36 @@ public class checkWxUseTime extends HttpServlet {
         JSONObject resJo = new JSONObject();
         Connection conn = null;
         PreparedStatement stmt = null;
+        String wxid = request.getParameter("wxid");
+        String sn = request.getParameter("sn");
         try {
             conn = utils.getConnection();
             stmt = conn.prepareStatement("update sn set lastHttpTime = ? where sn = ?");
             stmt.setString(1, utils.getCurrentTimeStr());
             stmt.setString(2, request.getParameter("sn"));
             if (stmt.executeUpdate() == 1) {
-                stmt = conn.prepareStatement("select sn from loginWx where wxid = ? and sn = ? limit 1");
-                stmt.setString(1, request.getParameter("wxid"));
-                stmt.setString(2, request.getParameter("sn"));
-                if (stmt.executeQuery().next()) {
-                    stmt = conn.prepareStatement("select lastGetTime from loginWx where wxid = ? limit 1");
-                    stmt.setString(1, request.getParameter("wxid"));
-                    ResultSet res = stmt.executeQuery();
-                    if (res.next()) {
-                        JSONObject wxJo = new JSONObject();
-                        if ((System.currentTimeMillis() / 1000) - ((long) (Integer.valueOf(config.get("loginWxUseTime")).intValue() * 60)) > ((long) res.getInt("lastGetTime"))) {
-                            stmt = conn.prepareStatement("update loginWx set lastGetTime = ? where wxid = ?");
-                            stmt.setInt(1, (int) (System.currentTimeMillis() / 1000));
-                            stmt.setString(2, request.getParameter("wxid"));
-                            stmt.execute();
-                            resJo.put("res", "success");
-                        } else {
-                            resJo.put("res", "fail");
-                            resJo.put("errInfo", "时间未超过设置的登录微信使用时间");
-                        }
+                stmt = conn.prepareStatement("select * from loginWx where wxid = ? limit 1");
+                stmt.setString(1, wxid);
+                ResultSet res = stmt.executeQuery();
+                if (res.next()) {
+                    JSONObject wxJo = new JSONObject();
+                    if ((System.currentTimeMillis() / 1000) - ((long) (Integer.valueOf(config.get("loginWxUseTime")).intValue() * 60)) > ((long) res.getInt("lastGetTime"))) {
+                        stmt = conn.prepareStatement("update loginWx set lastGetTime = ? where wxid = ? limit 1");
+                        stmt.setInt(1, (int) (System.currentTimeMillis() / 1000));
+                        stmt.setString(2, request.getParameter("wxid"));
+                        stmt.executeUpdate();
+                        resJo.put("res", "success");
                     } else {
+                        resJo.put("errInfo", "时间未超过设置的登录微信使用时间");
                         resJo.put("res", "fail");
-                        resJo.put("errInfo", "没有这个微信");
                     }
                 } else {
+                    resJo.put("errInfo", "没有这个微信");
                     resJo.put("res", "fail");
-                    resJo.put("errInfo", "此微信号不在本手机");
                 }
             } else {
-                resJo.put("res", "fail");
                 resJo.put("errInfo", "sn不存在： " + request.getParameter("sn"));
+                resJo.put("res", "fail");
             }
             if (conn != null) {
                 try {
@@ -73,8 +67,8 @@ public class checkWxUseTime extends HttpServlet {
                 stmt.close();
             }
         } catch (Exception e2) {
+            resJo.put("errInfo", utils.getExceptionMsg(e2));
             resJo.put("res", "fail");
-            resJo.put("errInfo", e2.getMessage());
             if (conn != null) {
                 try {
                     conn.close();

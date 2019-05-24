@@ -47,12 +47,12 @@ public class getAddWx extends HttpServlet {
 //                    stmt.execute("update customer set addNum = addNum + 1 where name = '" + customer + "'");
                     stmt.execute("update loginWx set addNum = addNum + 1 where wxid = '" + request.getParameter("loginWx") + "'");
                 } else {
-                    resJo.put("res", "fail");
                     resJo.put("errInfo", "没有可用添加微信");
+                    resJo.put("res", "fail");
                 }
             } else {
-                resJo.put("res", "fail");
                 resJo.put("errInfo", "noSn" + request.getParameter("sn"));
+                resJo.put("res", "fail");
             }
             if (stmt != null) {
                 try {
@@ -65,8 +65,8 @@ public class getAddWx extends HttpServlet {
                 conn.close();
             }
         } catch (Exception e2) {
+            resJo.put("errInfo", utils.getExceptionMsg(e2));
             resJo.put("res", "fail");
-            resJo.put("errInfo", e2.getMessage());
             if (stmt != null) {
                 try {
                     stmt.execute("unlock tables");

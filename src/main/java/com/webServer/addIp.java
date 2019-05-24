@@ -67,8 +67,8 @@ public class addIp extends HttpServlet {
                 stmt.close();
             }
         } catch (Exception e3) {
+            resJo.put("errInfo", utils.getExceptionMsg(e3));
             resJo.put("res", "fail");
-            resJo.put("errInfo", e3.getMessage());
             if (conn != null) {
                 try {
                     conn.close();

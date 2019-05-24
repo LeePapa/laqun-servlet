@@ -81,9 +81,7 @@ public class getSn extends HttpServlet {
                 stmt.close();
             }
         } catch (Exception e2) {
-            e2.printStackTrace();
-            resJo.put("errInfo", e2.getMessage());
-            getServletContext().log("web getSn err: " + e2.getMessage());
+            resJo.put("errInfo", utils.getExceptionMsg(e2));
             resJo.put("res", "fail");
             if (conn != null) {
                 try {

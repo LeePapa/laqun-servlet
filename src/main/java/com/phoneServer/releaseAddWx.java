@@ -42,8 +42,8 @@ public class releaseAddWx extends HttpServlet {
                 stmt.execute("update loginWx set addNum = addNum - 1 where wxid = '" + request.getParameter("loginWx") + "'");
                 resJo.put("res", "success");
             } else {
-                resJo.put("res", "fail");
                 resJo.put("errInfo", "noSn" + request.getParameter("sn"));
+                resJo.put("res", "fail");
             }
             if (stmt != null) {
                 try {
@@ -57,8 +57,8 @@ public class releaseAddWx extends HttpServlet {
             }
         } catch (Exception e2) {
             e2.printStackTrace();
+            resJo.put("errInfo", utils.getExceptionMsg(e2));
             resJo.put("res", "fail");
-            resJo.put("errInfo", e2.getMessage());
             if (stmt != null) {
                 try {
                     stmt.execute("unlock tables");
