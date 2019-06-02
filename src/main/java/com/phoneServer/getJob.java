@@ -26,22 +26,20 @@ public class getJob extends HttpServlet {
         JSONObject resJo = new JSONObject();
         Connection conn = null;
         PreparedStatement stmt = null;
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         try {
             conn = utils.getConnection();
-            stmt = conn.prepareStatement("update sn set lastHttpTime = ? where sn = ?");
-            stmt.setString(1, sdf.format(new Date()));
-            stmt.setString(2, request.getParameter("sn"));
-            stmt.executeUpdate();
-            stmt = conn.prepareStatement("select jobName, jobContent from sn where sn = ? limit 1");
-            stmt.setString(1, request.getParameter("sn"));
-            ResultSet res = stmt.executeQuery();
-            res.last();
-            if (res.getRow() > 0) {
-                JSONObject wxJo = new JSONObject();
-                wxJo.put("jobName", res.getString("jobName"));
-                wxJo.put("jobContent", res.getString("jobContent"));
-                resJo.put("data", wxJo);
+            if (utils.snHttpTimeMap.containsKey(request.getParameter("sn"))) {
+                utils.snHttpTimeMap.put(request.getParameter("sn"), utils.getCurrentTimeStr());
+                stmt = conn.prepareStatement("select jobName, jobContent from sn where sn = ? limit 1");
+                stmt.setString(1, request.getParameter("sn"));
+                ResultSet res = stmt.executeQuery();
+                res.last();
+                if (res.getRow() > 0) {
+                    JSONObject wxJo = new JSONObject();
+                    wxJo.put("jobName", res.getString("jobName"));
+                    wxJo.put("jobContent", res.getString("jobContent"));
+                    resJo.put("data", wxJo);
+                }
             } else {
                 resJo.put("errInfo", "noSn" + request.getParameter("sn"));
                 resJo.put("res", "fail");

@@ -32,10 +32,8 @@ public class updateLaQunHistory extends HttpServlet {
         try {
             String[] wxidArr= request.getParameter("wxidlist").split(",");
             conn = utils.getConnection();
-            stmt = conn.prepareStatement("update sn set lastHttpTime = ? where sn = ?");
-            stmt.setString(1, utils.getCurrentTimeStr());
-            stmt.setString(2, request.getParameter("sn"));
-            if (stmt.executeUpdate() == 1) {
+            if (utils.snHttpTimeMap.containsKey(request.getParameter("sn"))) {
+                utils.snHttpTimeMap.put(request.getParameter("sn"), utils.getCurrentTimeStr());
                 for (int i=0; i<wxidArr.length; i++) {
                     stmt = conn.prepareStatement("select * from laQunHistory where wxid = ? limit 1");
                     stmt.setString(1, wxidArr[i]);

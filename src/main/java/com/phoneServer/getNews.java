@@ -27,10 +27,8 @@ public class getNews extends HttpServlet {
         PreparedStatement stmt = null;
         try {
             conn = utils.getConnection();
-            stmt = conn.prepareStatement("update sn set lastHttpTime = ? where sn = ?");
-            stmt.setString(1, utils.getCurrentTimeStr());
-            stmt.setString(2, request.getParameter("sn"));
-            if (stmt.executeUpdate() == 1) {
+            if (utils.snHttpTimeMap.containsKey(request.getParameter("sn"))) {
+                utils.snHttpTimeMap.put(request.getParameter("sn"), utils.getCurrentTimeStr());
                 stmt = conn.prepareStatement("select * from news");
                 ResultSet res = stmt.executeQuery();
                 if (res.next()) {

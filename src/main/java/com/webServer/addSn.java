@@ -47,7 +47,8 @@ public class addSn extends HttpServlet {
                     if (!sArr[i].equals("")) {
                         stmt = conn.prepareStatement("insert into sn(sn) value(?)");
                         stmt.setString(1, sArr[i]);
-                        stmt.execute();
+                        stmt.executeUpdate();
+                        utils.snHttpTimeMap.put(sArr[i], "");
                     }
                 } catch (Exception e) {
                     getServletContext().log("addSn err: " + e.getMessage());

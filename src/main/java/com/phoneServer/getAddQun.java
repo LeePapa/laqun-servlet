@@ -39,10 +39,8 @@ public class getAddQun extends HttpServlet {
 //        String customerInParam = StringUtils.join(request.getParameter("customerArr").split(","), "','");
         try {
             conn = utils.getConnection();
-            stmt = conn.prepareStatement("update sn set lastHttpTime = ? where sn = ?");
-            stmt.setString(1, utils.getCurrentTimeStr());
-            stmt.setString(2, request.getParameter("sn"));
-            if (stmt.executeUpdate() == 1) {
+            if (utils.snHttpTimeMap.containsKey(sn)) {
+                utils.snHttpTimeMap.put(sn, utils.getCurrentTimeStr());
 //                stmt = conn.prepareStatement("select * from addQun where isBad = 0 and customer in ('" + customerInParam + "') and laNum > laedNum and (isUse = 0 or unix_timestamp(now())-lastGetTime>?) limit 1");
                 stmt = conn.prepareStatement("select * from addQun where isBad = 0 and  laNum > laedNum and (isUse = 0 or unix_timestamp(now())-lastGetTime>?) limit 1");
                 stmt.setInt(1, qunUseTimeout);

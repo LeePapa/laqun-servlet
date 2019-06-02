@@ -23,7 +23,6 @@ import java.sql.ResultSet;
 public class getOkLoginWx extends HttpServlet {
     /* Access modifiers changed, original: protected */
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        getServletContext().log("start get oklogin ");
         request.setCharacterEncoding("utf-8");
         response.setContentType("application/json;charset=utf-8");
         PrintWriter pw = response.getWriter();
@@ -34,20 +33,15 @@ public class getOkLoginWx extends HttpServlet {
         ResultSet res = null;
         String sn = request.getParameter("sn");
         try {
-            getServletContext().log("start get oklogin ");
             conn = utils.getConnection();
-            stmt = conn.prepareStatement("update sn set lastHttpTime = ? where sn = ? limit 1");
-            stmt.setString(1, utils.getCurrentTimeStr());
-            stmt.setString(2, request.getParameter("sn"));
-            if (stmt.executeUpdate() == 1) {
-                getServletContext().log("start get oklogin ");
+            if (utils.snHttpTimeMap.containsKey(request.getParameter("sn"))) {
+                utils.snHttpTimeMap.put(request.getParameter("sn"), utils.getCurrentTimeStr());
                 stmt = conn.prepareStatement("select * from loginWx where sn = ? and state = '正常'");
                 stmt.setString(1, sn);
                 res = stmt.executeQuery();
                 JSONArray dataJa = new JSONArray();
                 while (res.next()) {
                     JSONObject jo = new JSONObject();
-                    getServletContext().log(res.getString("wxName"));
                     jo.put("wxName", res.getString("wxName"));
                     jo.put("wxPassword", res.getString("wxPassword"));
                     jo.put("wxPasswordbak", res.getString("wxPasswordbak"));

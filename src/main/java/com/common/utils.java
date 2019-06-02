@@ -4,6 +4,7 @@ import java.io.*;
 import java.sql.Connection;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.fileupload.FileItem;
@@ -11,6 +12,10 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 public class utils {
+    public static Map<String, String> snHttpTimeMap = Collections.synchronizedMap(new HashMap<String, String>()); //sn访问接口的时间
+    public static AtomicBoolean isGetAddWx = new AtomicBoolean(false); //是否正在从数据库获取addWx
+    public static AtomicBoolean hasAddWx = new AtomicBoolean(true); //数据库是否有没用过的addWx
+    public static List<String> addWxList = Collections.synchronizedList(new LinkedList<String>()); //addWx的列表
     public static String webPath = "";
     public static String tpUriPre = "-1258004048.cos.ap-guangzhou.myqcloud.com/";
     public static SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

@@ -13,10 +13,10 @@ public class DbUtils {
     public static void initDataSource() {
         p = new PoolProperties();
 //        p.setUrl("jdbc:mysql://172.16.0.16:3306/laqun?serverTimezone=GMT&characterEncoding=utf-8&useUnicode=true&useSSL=false");
-//        p.setUrl("jdbc:mysql://tdsql-k3gjdmst.sql.tencentcdb.com:21/laqun?serverTimezone=GMT&characterEncoding=utf-8&useUnicode=true&useSSL=false");
-        p.setInitSQL("set names utf8mb4");
-        p.setUrl("jdbc:mysql://localhost:3306/laqun?serverTimezone=GMT&characterEncoding=utf-8&useUnicode=true");
+//        p.setUrl("jdbc:mysql://tdsql-k3gjdmst.sql.tencentcdb.com:21/laqun?serverTimezone=GMT&characterEncoding=utf8&useUnicode=true&useSSL=false");
+        p.setUrl("jdbc:mysql://localhost:3306/laqun?serverTimezone=GMT&characterEncoding=utf8&useUnicode=true");
         p.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        p.setInitSQL("set names utf8mb4");
         p.setUsername("laqun");
         p.setPassword("laqunQun1");
         p.setJmxEnabled(true);
@@ -26,7 +26,7 @@ public class DbUtils {
         p.setValidationInterval(30000);
         p.setTimeBetweenEvictionRunsMillis(30000);
         p.setMaxActive(300);//100
-        p.setInitialSize(20);//10
+        p.setInitialSize(30);//10
         p.setMaxWait(10000); //ms
         p.setMinEvictableIdleTimeMillis(30000);
         p.setMinIdle(20);//10
@@ -40,7 +40,9 @@ public class DbUtils {
 
     public static Connection getConnect() {
         try {
-            return ds.getConnection();
+            Connection conn = ds.getConnection();
+            conn.nativeSQL("set names utf8mb4");
+            return conn;
         } catch (Exception e) {
             e.printStackTrace();
             return null;

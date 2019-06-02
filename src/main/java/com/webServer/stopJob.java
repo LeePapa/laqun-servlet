@@ -13,6 +13,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
 @WebServlet({"/api/webServer/stopJob"})
@@ -30,25 +32,15 @@ public class stopJob extends HttpServlet {
             pw.println(resJo);
             return;
         }
+        String snInStr = StringUtils.join(request.getParameter("snArrStr").split(","), "','");
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
             conn = utils.getConnection();
-            stmt = conn.prepareStatement("select jobName from sn where sn = ? limit 1");
-            stmt.setString(1, request.getParameter("sn"));
-            ResultSet res = stmt.executeQuery();
-            if (!res.next()) {
-                resJo.put("res", "fail");
-                resJo.put("errInfo", "sn不存在");
-            } else if (!res.getString("jobName").equals("任务已停止")) {
-                stmt = conn.prepareStatement("update sn set jobName='正在停止任务...', stopContent='手动停止' where sn = ?");
-                stmt.setString(1, request.getParameter("sn"));
-                stmt.execute();
-                resJo.put("res", "success");
-            }else{
-                resJo.put("errInfo", "不要重复停止");
-                resJo.put("res", "errInfo");
-            }
+            stmt = conn.prepareStatement("update sn set jobName='正在停止任务...', stopContent='手动停止' where sn in ('" + snInStr + "')");
+//            stmt.setString(1, "(" + snInStr + ")");
+            stmt.executeUpdate();
+            resJo.put("res", "success");
             if (conn != null) {
                 try {
                     conn.close();

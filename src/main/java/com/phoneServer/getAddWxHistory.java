@@ -29,13 +29,12 @@ public class getAddWxHistory extends HttpServlet {
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet res = null;
+        String sn = request.getParameter("sn");
         try {
             String[] wxidArr= request.getParameter("wxidlist").split(",");
             conn = utils.getConnection();
-            stmt = conn.prepareStatement("update sn set lastHttpTime = ? where sn = ?");
-            stmt.setString(1, utils.getCurrentTimeStr());
-            stmt.setString(2, request.getParameter("sn"));
-            if (stmt.executeUpdate() == 1) {
+            if (utils.snHttpTimeMap.containsKey(sn)) {
+                utils.snHttpTimeMap.put(sn, utils.getCurrentTimeStr());
                 JSONArray ja = new JSONArray();
                 for (int i=0; i<wxidArr.length; i++) {
                     stmt = conn.prepareStatement("select addNum, remark from addWxHistory where wxid = ? limit 1");

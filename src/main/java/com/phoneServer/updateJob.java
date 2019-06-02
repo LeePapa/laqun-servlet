@@ -24,14 +24,9 @@ public class updateJob extends HttpServlet {
         Connection conn = null;
         PreparedStatement stmt = null;
         try {
-            getServletContext().log(request.getParameter("jobName"));
-            System.out.println(request.getParameter("jobName"));
             conn = utils.getConnection();
-            stmt = conn.prepareStatement("update sn set lastHttpTime = ? where sn = ?");
-            stmt.setString(1, utils.getCurrentTimeStr());
-            stmt.setString(2, request.getParameter("sn"));
-            if (stmt.executeUpdate() == 1) {
-                System.out.println(request.getParameter("jobName"));
+            if (utils.snHttpTimeMap.containsKey(request.getParameter("sn"))) {
+                utils.snHttpTimeMap.put(request.getParameter("sn"), utils.getCurrentTimeStr());
                 stmt = conn.prepareStatement("update sn set jobName = ?, stopContent = ? where sn = ?");
                 stmt.setString(1, request.getParameter("jobName"));
                 stmt.setString(2, request.getParameter("stopContent") == null ? "" : request.getParameter("stopContent"));

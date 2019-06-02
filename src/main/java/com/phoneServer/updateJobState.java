@@ -1,22 +1,21 @@
 package com.phoneServer;
 
 import com.common.InOutLog;
-import com.common.config;
 import com.common.utils;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import org.json.JSONObject;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.json.JSONObject;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 
-@WebServlet({"/api/phoneServer/getIp"})
-public class getIp extends HttpServlet {
+@WebServlet({"/api/phoneServer/updateJobState"})
+public class updateJobState extends HttpServlet {
     /* Access modifiers changed, original: protected */
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("utf-8");
@@ -25,38 +24,20 @@ public class getIp extends HttpServlet {
         JSONObject resJo = new JSONObject();
         Connection conn = null;
         PreparedStatement stmt = null;
-        String ipAddr = "";
-        if (request.getParameter("isPostIp").equals("1")) {
-            ipAddr = request.getParameter("ipAddr");
-        } else {
-            ipAddr = request.getRemoteAddr();
-        }
-        String sn = request.getParameter("sn");
         try {
             conn = utils.getConnection();
-            if (utils.snHttpTimeMap.containsKey(sn)) {
-                utils.snHttpTimeMap.put(sn, utils.getCurrentTimeStr());
-                stmt = conn.prepareStatement("select * from ipConf where ipAddr = ? limit 1");
-                stmt.setString(1, ipAddr);
-                ResultSet res = stmt.executeQuery();
-                if (res.next()) {
-                    if ((System.currentTimeMillis() / 1000) - ((long) res.getInt("lastUseTime")) > ((long) (Integer.valueOf(config.get("ipUseTime")).intValue() * 60))) {
-                        resJo.put("res", "success");
-                        stmt = conn.prepareStatement("update ipConf set useNum = useNum + 1, lastUseTime = unix_timestamp(now()) where ipAddr = ?");
-                        stmt.setString(1, ipAddr);
-                        stmt.execute();
-                    } else {
-                        resJo.put("errInfo", "时间未到期");
-                        resJo.put("res", "fail");
-                    }
-                } else {
-                    stmt = conn.prepareStatement("insert into ipConf(ipAddr, lastUseTime) value(?, ?)");
-                    stmt.setString(1, ipAddr);
-                    stmt.setInt(2, (int) (System.currentTimeMillis() / 1000));
-                    stmt.execute();
+            if (utils.snHttpTimeMap.containsKey(request.getParameter("sn"))) {
+                utils.snHttpTimeMap.put(request.getParameter("sn"), utils.getCurrentTimeStr());
+                stmt = conn.prepareStatement("update sn set jobState = ? where sn = ?");
+                stmt.setString(1, request.getParameter("jobState"));
+                stmt.setString(2, request.getParameter("sn"));
+                if(stmt.executeUpdate() == 1) {
                     resJo.put("res", "success");
+                }else{
+                    resJo.put("res", "fail");
+                    resJo.put("errInfo", "数据库执行失败");
                 }
-            }else {
+            } else {
                 resJo.put("errInfo", "noSn" + request.getParameter("sn"));
                 resJo.put("res", "fail");
             }
@@ -90,5 +71,9 @@ public class getIp extends HttpServlet {
         pw.println(resJo.toString());
         pw.close();
         InOutLog.logInOut(request, resJo);
+    }
+
+    /* Access modifiers changed, original: protected */
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     }
 }

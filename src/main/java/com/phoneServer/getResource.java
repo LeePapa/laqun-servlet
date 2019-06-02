@@ -21,7 +21,6 @@ import org.json.JSONObject;
 public class getResource extends HttpServlet {
     /* Access modifiers changed, original: protected */
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        getServletContext().log("start put info");
         request.setCharacterEncoding("utf-8");
         response.setContentType("application/json;charset=utf-8");
         PrintWriter pw = response.getWriter();
@@ -30,14 +29,10 @@ public class getResource extends HttpServlet {
         PreparedStatement stmt = null;
         int resourcesNum = Integer.valueOf(request.getParameter("resourcesNum")).intValue();
         String resourceType = request.getParameter("resourcesType");
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        getServletContext().log("start put info");
         try {
             conn = utils.getConnection();
-            stmt = conn.prepareStatement("update sn set lastHttpTime = ? where sn = ?");
-            stmt.setString(1, utils.getCurrentTimeStr());
-            stmt.setString(2, request.getParameter("sn"));
-            if (stmt.executeUpdate() == 1) {
+            if (utils.snHttpTimeMap.containsKey(request.getParameter("sn"))) {
+                utils.snHttpTimeMap.put(request.getParameter("sn"), utils.getCurrentTimeStr());
                 stmt = conn.prepareStatement("select * from resource where type = ? order by rand() limit ?");
                 stmt.setString(1, resourceType);
                 stmt.setInt(2, resourcesNum);
@@ -53,11 +48,6 @@ public class getResource extends HttpServlet {
                 }
                 resJo.put("res", "success");
                 resJo.put("data", resJa);
-                //更新手机的最后连接时间
-                stmt = conn.prepareStatement("update sn set lastHttpTime = ? where sn = ?");
-                stmt.setString(1, sdf.format(new Date()));
-                stmt.setString(2, request.getParameter("sn"));
-                stmt.executeUpdate();
             } else {
                 resJo.put("errInfo", "noSn" + request.getParameter("sn"));
                 resJo.put("res", "fail");

@@ -26,10 +26,9 @@ public class updateLoginWx extends HttpServlet {
         PreparedStatement stmt = null;
         try {
             conn = utils.getConnection();
-            stmt = conn.prepareStatement("update sn set lastHttpTime = ? where sn = ?");
-            stmt.setString(1, utils.getCurrentTimeStr());
-            stmt.setString(2, request.getParameter("sn"));
-            if (stmt.executeUpdate() == 1) {
+            conn.nativeSQL("set names utf8mb4");
+            if (utils.snHttpTimeMap.containsKey(request.getParameter("sn"))) {
+                utils.snHttpTimeMap.put(request.getParameter("sn"), utils.getCurrentTimeStr());
                 String wxPasswordbak = request.getParameter("wxPasswordbak");
 
                 stmt = conn.prepareStatement("select * from loginWx where wxid = ? limit 1");

@@ -3,6 +3,7 @@ package com.webServer;
 import com.common.config;
 import com.common.utils;
 import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
 import javax.servlet.ServletException;
@@ -35,12 +36,13 @@ public class setSnRemark extends HttpServlet {
         resJo.put("saveSnCount", 0);
         Connection conn = null;
         PreparedStatement stmt = null;
+        int snNum = request.getParameter("snArrStr").split(",").length;
+        String snInStr = StringUtils.join(request.getParameter("snArrStr").split(","), "','");
         try {
             conn = utils.getConnection();
-            stmt = conn.prepareStatement("update sn set remark = ? where sn = ?");
+            stmt = conn.prepareStatement("update sn set remark = ? where sn in ('" + snInStr + "')");
             stmt.setString(1, request.getParameter("remark"));
-            stmt.setString(2, request.getParameter("sn"));
-            if (stmt.executeUpdate() == 1) {
+            if (stmt.executeUpdate() == snNum) {
                 resJo.put("res", "success");
             }else{
                 resJo.put("res", "fail");
