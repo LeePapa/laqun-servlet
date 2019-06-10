@@ -1,25 +1,20 @@
 package com.phoneServer;
 
 import com.common.InOutLog;
-import com.common.config;
 import com.common.utils;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import org.json.JSONObject;
 
-@WebServlet({"/api/phoneServer/updateLaQunHistory"})
-public class updateLaQunHistory extends HttpServlet {
+@WebServlet({"/api/phoneServer/insertSnException"})
+public class insertSnException extends HttpServlet {
     /* Access modifiers changed, original: protected */
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("utf-8");
@@ -28,39 +23,25 @@ public class updateLaQunHistory extends HttpServlet {
         JSONObject resJo = new JSONObject();
         Connection conn = null;
         PreparedStatement stmt = null;
-        ResultSet res = null;
         try {
-            String[] wxidArr= request.getParameter("wxidlist").split(",");
             conn = utils.getConnection();
             if (utils.snHttpTimeMap.containsKey(request.getParameter("sn"))) {
                 utils.snHttpTimeMap.put(request.getParameter("sn"), utils.getCurrentTimeStr());
-                for (int i=0; i<wxidArr.length; i++) {
-                    stmt = conn.prepareStatement("select * from laQunHistory where wxid = ? limit 1");
-                    stmt.setString(1, wxidArr[i]);
-                    res = stmt.executeQuery();
-                    if(res.next()) {
-                        stmt = conn.prepareStatement("update laQunHistory set laNum = laNum + 1, laTime = ?  where wxid = ?");
-                        stmt.setString(1, utils.getCurrentTimeStr());
-                        stmt.setString(2, wxidArr[i]);
-                    }else{
-                        stmt = conn.prepareStatement("insert into laQunHistory(wxid, laNum, addTime, laTime) values(?, 1, ?, ?)");
-                        stmt.setString(1, wxidArr[i]);
-                        stmt.setString(2, utils.getCurrentTimeStr());
-                        stmt.setString(3, utils.getCurrentTimeStr());
-                    }
-                    if(stmt.executeUpdate() == 1) {
-                        getServletContext().log(wxidArr[i] + ": 插入成功laQunHistory");
-                    }else {
-                        getServletContext().log(wxidArr[i] + ": 插入失败laQunHistory");
-                    }
+                stmt = conn.prepareStatement("insert into snException(sn, exceptionInfo, exceptionTime) values(?, ?, ?)");
+                stmt.setString(1, request.getParameter("sn"));
+                stmt.setString(2, request.getParameter("exceptionInfo"));
+                stmt.setString(3, utils.getCurrentTimeStr());
+                if(stmt.executeUpdate() == 1) {
+                    resJo.put("res", "success");
+                }else {
+                    resJo.put("res", "fail");
+                    resJo.put("errInfo", "插入数据库失败");
                 }
-                resJo.put("res", "success");
-            }else{
+            } else {
                 resJo.put("errInfo", "noSn" + request.getParameter("sn"));
                 resJo.put("res", "fail");
             }
 
-            res.close();
             if (conn != null) {
                 try {
                     conn.close();
@@ -71,7 +52,6 @@ public class updateLaQunHistory extends HttpServlet {
                 stmt.close();
             }
         } catch (Exception e2) {
-            e2.printStackTrace();
             resJo.put("errInfo", utils.getExceptionMsg(e2));
             resJo.put("res", "fail");
             if (conn != null) {
@@ -88,9 +68,9 @@ public class updateLaQunHistory extends HttpServlet {
                 }
             }
         }
-        InOutLog.logInOut(request, resJo);
-        pw.println(resJo);
+        pw.println(resJo.toString());
         pw.close();
+        InOutLog.logInOut(request, resJo);
     }
 
     /* Access modifiers changed, original: protected */
