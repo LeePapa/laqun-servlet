@@ -17,7 +17,7 @@ public class utils {
     public static AtomicBoolean hasAddWx = new AtomicBoolean(true); //数据库是否有没用过的addWx
     public static List<String> addWxList = Collections.synchronizedList(new LinkedList<String>()); //addWx的列表
     public static String webPath = "";
-    public static String tpUriPre = "-1258004048.cos.ap-guangzhou.myqcloud.com/";
+    public static String tpUriPre = "-1259415556.cos.ap-guangzhou.myqcloud.com/";
     public static SimpleDateFormat sdf= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     public static String getCurrentTimeStr() {

@@ -12,7 +12,7 @@ import java.util.Map;
 
 public class InOutLog {
     public static void logInOut(HttpServletRequest request, JSONObject resJo) {
-        if (resJo.optString("res").equals("fail") && !resJo.optString("errInfo").equals("时间未到期")) {
+        if (resJo.optString("res").equals("fail") && !resJo.optString("errInfo").equals("时间未到期") && !resJo.optString("errInfo").startsWith("noSn")) {
             String url = request.getRequestURI();
             //遍历出手机提交的全部参数
             Map<String, String[]> reqMap = request.getParameterMap();
@@ -20,10 +20,12 @@ public class InOutLog {
             for(String k: reqMap.keySet()) {
                 reqJo.put(k, reqMap.get(k));
             }
-            request.getServletContext().log("=============================================================================================");
-            request.getServletContext().log(url);
-            request.getServletContext().log(reqJo.toString());
-            request.getServletContext().log(resJo.toString());
+            StringBuilder sb = new StringBuilder();
+            sb.append("=============================================================================================");
+            sb.append(url);
+            sb.append(reqJo.toString());
+            sb.append(resJo.toString());
+            request.getServletContext().log(sb.toString());
         }
     }
 }

@@ -48,9 +48,7 @@ public class updateLaQunHistory extends HttpServlet {
                         stmt.setString(2, utils.getCurrentTimeStr());
                         stmt.setString(3, utils.getCurrentTimeStr());
                     }
-                    if(stmt.executeUpdate() == 1) {
-                        getServletContext().log(wxidArr[i] + ": 插入成功laQunHistory");
-                    }else {
+                    if(stmt.executeUpdate() != 1) {
                         getServletContext().log(wxidArr[i] + ": 插入失败laQunHistory");
                     }
                 }
